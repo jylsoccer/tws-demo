@@ -1,25 +1,19 @@
 package samples.testbed;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
+import com.ib.client.*;
+import com.ib.client.Types.FADataType;
 import samples.testbed.advisor.FAMethodSamples;
 import samples.testbed.contracts.ContractSamples;
 import samples.testbed.orders.AvailableAlgoParams;
 import samples.testbed.orders.OrderSamples;
 import samples.testbed.scanner.ScannerSubscriptionSamples;
 
-import com.ib.client.Contract;
-import com.ib.client.EClientSocket;
-import com.ib.client.EReader;
-import com.ib.client.EReaderSignal;
-import com.ib.client.ExecutionFilter;
-import com.ib.client.Order;
-import com.ib.client.Types.FADataType;
-import com.ib.controller.AccountSummaryTag;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
-public class Testbed {
+public class Testbed2 {
 
 	public static void main(String[] args) throws InterruptedException {
 		EWrapperImpl wrapper = new EWrapperImpl();
@@ -45,17 +39,17 @@ public class Testbed {
         	}
         }.start();
         //! [ereader]
-        Thread.sleep(1000);
+//        Thread.sleep(1000);
 		
-		//orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
-		//contractOperations(wrapper.getClient());
-        //hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());
-        //testAlgoSamples(wrapper.getClient(), wrapper.getCurrentOrderId());
+//		orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
+//		contractOperations(wrapper.getClient());
+//        hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());
+//        testAlgoSamples(wrapper.getClient(), wrapper.getCurrentOrderId());
         //bracketSample(wrapper.getClient(), wrapper.getCurrentOrderId());
 		//bulletins(wrapper.getClient());
         //reutersFundamentals(wrapper.getClient());
         //marketDataType(wrapper.getClient());
-        //historicalDataRequests(wrapper.getClient());
+        historicalDataRequests(wrapper.getClient());
         //accountOperations(wrapper.getClient());
 		
 		Thread.sleep(100000);

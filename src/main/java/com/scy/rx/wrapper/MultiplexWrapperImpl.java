@@ -1,33 +1,48 @@
-package samples.testbed;
+package com.scy.rx.wrapper;
 
 import com.ib.client.*;
+import com.scy.rx.model.HistoricalDataResponse;
+import io.reactivex.FlowableEmitter;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
-//! [ewrapperimpl]
-public class EWrapperImpl implements EWrapper {
-	//! [ewrapperimpl]
+@Slf4j
+public class MultiplexWrapperImpl implements EWrapper {
 
-	//! [socket_declare]
 	private EReaderSignal readerSignal;
 	private EClientSocket clientSocket;
 	protected int currentOrderId = -1;
-	//! [socket_declare]
 
-	//! [socket_init]
-	public EWrapperImpl() {
+	private LinkedHashMap<Integer, FlowableEmitter> flowableEmitterMap = new LinkedHashMap<Integer, FlowableEmitter>() {
+		private static final long serialVersionUID = 1L;
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<Integer, FlowableEmitter> eldest) {
+			return size() > 100;
+		}
+	};
+
+	public FlowableEmitter putFlowableEmitter(Integer key, FlowableEmitter emitter) {
+		return flowableEmitterMap.putIfAbsent(key, emitter);
+	}
+
+	public MultiplexWrapperImpl() {
 		readerSignal = new EJavaSignal();
 		clientSocket = new EClientSocket(this, readerSignal);
 	}
-	//! [socket_init]
-	public EClientSocket getClient() {
+
+	public EClientSocket getClientSocket() {
 		return clientSocket;
 	}
 	
 	public EReaderSignal getSignal() {
 		return readerSignal;
 	}
-	
+
+
+
 	public int getCurrentOrderId() {
 		return currentOrderId;
 	}
@@ -218,6 +233,13 @@ public class EWrapperImpl implements EWrapper {
 			double high, double low, double close, int volume, int count,
 			double WAP, boolean hasGaps) {
 		System.out.println("HistoricalData. "+reqId+" - Date: "+date+", Open: "+open+", High: "+high+", Low: "+low+", Close: "+close+", Volume: "+volume+", Count: "+count+", WAP: "+WAP+", HasGaps: "+hasGaps);
+		HistoricalDataResponse response = new HistoricalDataResponse(reqId, date, open, high, low, close, volume, count, WAP, hasGaps);
+		FlowableEmitter<HistoricalDataResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter == null) {
+			log.error("historicalData, emitter not registered. tickerId:{}", reqId);
+			return;
+		}
+		emitter.onNext(response);
 	}
 	//! [historicaldata]
 	
