@@ -23,12 +23,10 @@ public class TradeApiServiceTest {
     public void test() throws Exception {
         log.info("test begin");
 
+        log.info("1:reqId:{}", traderApi.reqId());
+        log.info("2:reqId:{}", traderApi.reqId());
+        log.info("3:reqId:{}", traderApi.reqId());
 
-        log.info("reqId:{}", traderApi.reqId());
-        TimeUnit.SECONDS.sleep(1);
-        log.info("reqId2:{}", traderApi.reqId());
-        TimeUnit.SECONDS.sleep(1);
-        log.info("reqId3:{}", traderApi.reqId());
         Thread.sleep(10000);
     }
 

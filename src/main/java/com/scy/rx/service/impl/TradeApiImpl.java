@@ -29,9 +29,11 @@ public class TradeApiImpl implements TraderApi {
     @Autowired
     private EConnClient eConnClient;
 
-
     @Override
-    public int reqId() throws Exception {
+    public synchronized Integer reqId() throws Exception {
+        if (futureMap.get(-1) != null) {
+            throw new RuntimeException("reqId-future already exists.");
+        }
         CompletableFuture<Integer> future = new CompletableFuture<>();
         futureMap.put(-1, future);
         EClientSocket client = eConnClient.getClientSocket();

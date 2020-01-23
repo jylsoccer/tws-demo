@@ -154,7 +154,7 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void nextValidId(int orderId) {
 		log.info("Next Valid Id: [{}]", orderId);
-		CompletableFuture<Integer> future = futureMap.get(-1);
+		CompletableFuture<Integer> future = futureMap.remove(-1);
 		if (future != null) {
 			future.complete(orderId);
 		}
