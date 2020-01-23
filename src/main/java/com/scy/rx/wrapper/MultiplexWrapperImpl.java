@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -19,6 +20,9 @@ public class MultiplexWrapperImpl implements EWrapper {
 
 	@Autowired
 	private FlowableEmitterMap flowableEmitterMap;
+
+	@Autowired
+	private FutureMap futureMap;
 
 	public MultiplexWrapperImpl() {
 		readerSignal = new EJavaSignal();
@@ -149,7 +153,11 @@ public class MultiplexWrapperImpl implements EWrapper {
 	//! [nextvalidid]
 	@Override
 	public void nextValidId(int orderId) {
-		System.out.println("Next Valid Id: ["+orderId+"]");
+		log.info("Next Valid Id: [{}]", orderId);
+		CompletableFuture<Integer> future = futureMap.get(-1);
+		if (future != null) {
+			future.complete(orderId);
+		}
 		currentOrderId = orderId;
 	}
 	//! [nextvalidid]

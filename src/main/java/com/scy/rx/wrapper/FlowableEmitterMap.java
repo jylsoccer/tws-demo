@@ -17,7 +17,7 @@ public class FlowableEmitterMap {
     };
 
     public FlowableEmitter put(Integer key, FlowableEmitter emitter) {
-        return flowableEmitterMap.putIfAbsent(key, emitter);
+        return flowableEmitterMap.put(key, emitter);
     }
 
     public FlowableEmitter get(Integer key) {

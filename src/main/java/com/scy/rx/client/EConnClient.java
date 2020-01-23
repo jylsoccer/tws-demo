@@ -31,7 +31,7 @@ public class EConnClient {
         log.info("EConnClient connect.");
         clientSocket = wrapper.getClientSocket();
         EReaderSignal signal = wrapper.getSignal();
-        clientSocket.eConnect("127.0.0.1", 7496, 0);
+        clientSocket.eConnect("127.0.0.1", 7497, 0);
 
         final EReader reader = new EReader(clientSocket, signal);
         reader.start();

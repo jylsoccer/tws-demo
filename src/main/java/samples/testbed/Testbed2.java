@@ -21,7 +21,7 @@ public class Testbed2 {
 		final EClientSocket m_client = wrapper.getClient();
 		final EReaderSignal m_signal = wrapper.getSignal();
 		//! [connect]
-		m_client.eConnect("127.0.0.1", 7496, 0);
+		m_client.eConnect("127.0.0.1", 7497, 0);
 		//! [connect]
 		//! [ereader]
 		final EReader reader = new EReader(m_client, m_signal);        
@@ -40,8 +40,8 @@ public class Testbed2 {
         }.start();
         //! [ereader]
 //        Thread.sleep(1000);
-		
-//		orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
+
+		orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
 //		contractOperations(wrapper.getClient());
 //        hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());
 //        testAlgoSamples(wrapper.getClient(), wrapper.getCurrentOrderId());
@@ -49,8 +49,8 @@ public class Testbed2 {
 		//bulletins(wrapper.getClient());
         //reutersFundamentals(wrapper.getClient());
         //marketDataType(wrapper.getClient());
-        historicalDataRequests(wrapper.getClient());
-        //accountOperations(wrapper.getClient());
+//        historicalDataRequests(wrapper.getClient());
+//        accountOperations(wrapper.getClient());
 		
 		Thread.sleep(100000);
 		m_client.eDisconnect();
@@ -79,26 +79,26 @@ public class Testbed2 {
         client.reqOpenOrders();
         //! [reqopenorders]
         //Thread.sleep(1000);
-		
+
         /*** Placing/modifying an order - remember to ALWAYS increment the nextValidId after placing an order so it can be used for the next one! ***/
         //! [order_submission]
         client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 1, 50));
         //! [order_submission]
-        
+
         //! [faorderoneaccount]
         Order faOrderOneAccount = OrderSamples.MarketOrder("BUY", 100);
         // Specify the Account Number directly
         faOrderOneAccount.account("DU119915");
         client.placeOrder(nextOrderId++, ContractSamples.USStock(), faOrderOneAccount);
         //! [faorderoneaccount]
-        
+
         //! [faordergroupequalquantity]
         Order faOrderGroupEQ = OrderSamples.LimitOrder("SELL", 200, 2000);
         faOrderGroupEQ.faGroup("Group_Equal_Quantity");
         faOrderGroupEQ.faMethod("EqualQuantity");
         client.placeOrder(nextOrderId++, ContractSamples.USStock(), faOrderGroupEQ);
         //! [faordergroupequalquantity]
-        
+
         //! [faordergrouppctchange]
         Order faOrderGroupPC = OrderSamples.MarketOrder("BUY", 0); ;
         // You should not specify any order quantity for PctChange allocation method
@@ -107,21 +107,21 @@ public class Testbed2 {
         faOrderGroupPC.faPercentage("100");
         client.placeOrder(nextOrderId++, ContractSamples.EurGbpFx(), faOrderGroupPC);
         //! [faordergrouppctchange]
-        
+
         //! [faorderprofile]
         Order faOrderProfile = OrderSamples.LimitOrder("BUY", 200, 100);
         faOrderProfile.faProfile("Percent_60_40");
         client.placeOrder(nextOrderId++, ContractSamples.EuropeanStock(), faOrderProfile);
         //! [faorderprofile]
-        
+
 		//client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.PeggedToMarket("BUY", 10, 0.01));
 		//client.placeOrder(nextOrderId++, ContractSamples.EurGbpFx(), OrderSamples.MarketOrder("BUY", 10));
         //client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.Discretionary("SELL", 1, 45, 0.5));
-		
+
         //! [reqexecutions]
         client.reqExecutions(10001, new ExecutionFilter());
         //! [reqexecutions]
-        
+
         Thread.sleep(10000);
         
     }
