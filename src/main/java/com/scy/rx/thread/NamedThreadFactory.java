@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class NamedThreadFactory implements ThreadFactory {
 
-    public static final String NAME_THREAD_PREFIX = "rx-pool-";
+    public static final String NAME_THREAD_PREFIX = "scy-";
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
     private ThreadGroup group;

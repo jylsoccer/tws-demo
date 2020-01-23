@@ -4,29 +4,21 @@ import com.ib.client.*;
 import com.scy.rx.model.HistoricalDataResponse;
 import io.reactivex.FlowableEmitter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
 @Slf4j
+@Service
 public class MultiplexWrapperImpl implements EWrapper {
 
 	private EReaderSignal readerSignal;
 	private EClientSocket clientSocket;
 	protected int currentOrderId = -1;
 
-	private LinkedHashMap<Integer, FlowableEmitter> flowableEmitterMap = new LinkedHashMap<Integer, FlowableEmitter>() {
-		private static final long serialVersionUID = 1L;
-		@Override
-		protected boolean removeEldestEntry(Map.Entry<Integer, FlowableEmitter> eldest) {
-			return size() > 100;
-		}
-	};
-
-	public FlowableEmitter putFlowableEmitter(Integer key, FlowableEmitter emitter) {
-		return flowableEmitterMap.putIfAbsent(key, emitter);
-	}
+	@Autowired
+	private FlowableEmitterMap flowableEmitterMap;
 
 	public MultiplexWrapperImpl() {
 		readerSignal = new EJavaSignal();
@@ -227,7 +219,6 @@ public class MultiplexWrapperImpl implements EWrapper {
 	}
 	//! [receivefa]
 	
-	//! [historicaldata]
 	@Override
 	public void historicalData(int reqId, String date, double open,
 			double high, double low, double close, int volume, int count,
@@ -241,8 +232,7 @@ public class MultiplexWrapperImpl implements EWrapper {
 		}
 		emitter.onNext(response);
 	}
-	//! [historicaldata]
-	
+
 	//! [scannerparameters]
 	@Override
 	public void scannerParameters(String xml) {

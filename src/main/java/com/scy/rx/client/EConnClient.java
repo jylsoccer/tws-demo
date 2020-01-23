@@ -6,31 +6,31 @@ import com.ib.client.EReaderSignal;
 import com.scy.rx.thread.ThreadPools;
 import com.scy.rx.wrapper.MultiplexWrapperImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
+@Component
 public class EConnClient {
+    @Autowired
     private MultiplexWrapperImpl wrapper;
 
     private EClientSocket clientSocket;
-    private EReaderSignal signal;
 
-    private ExecutorService executorService = ThreadPools.createFixedPool("EConnClientHolder", 1);
+    private ExecutorService executorService = ThreadPools.createFixedPool("EConnClient", 1);
 
     public EClientSocket getClientSocket() {
         return clientSocket;
     }
 
-    public EConnClient() {
-        wrapper = new MultiplexWrapperImpl();
+    @PostConstruct
+    public void connect() {
+        log.info("EConnClient connect.");
         clientSocket = wrapper.getClientSocket();
-        signal = wrapper.getSignal();
-        connect();
-    }
-
-    private void connect() {
-        log.info("EConnClientHolder init.");
+        EReaderSignal signal = wrapper.getSignal();
         clientSocket.eConnect("127.0.0.1", 7496, 0);
 
         final EReader reader = new EReader(clientSocket, signal);
@@ -41,13 +41,9 @@ public class EConnClient {
                 try {
                     reader.processMsgs();
                 } catch (Exception e) {
-                    log.error("EConnClientHolder reader.processMsgs Exception.", e);
+                    log.error("EConnClient reader.processMsgs Exception.", e);
                 }
             }
         });
-    }
-
-    public MultiplexWrapperImpl getWrapper() {
-        return wrapper;
     }
 }
