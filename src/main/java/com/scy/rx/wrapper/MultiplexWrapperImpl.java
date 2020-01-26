@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
+
 @Slf4j
 @Service
 public class MultiplexWrapperImpl implements EWrapper {
@@ -154,7 +156,7 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void nextValidId(int orderId) {
 		log.info("Next Valid Id: [{}]", orderId);
-		CompletableFuture<Integer> future = futureMap.remove(-1);
+		CompletableFuture<Integer> future = futureMap.get(KEY_REQID);
 		if (future != null) {
 			future.complete(orderId);
 		}
@@ -239,6 +241,10 @@ public class MultiplexWrapperImpl implements EWrapper {
 			return;
 		}
 		emitter.onNext(response);
+		if (date.startsWith("finished-")) {
+			emitter.onComplete();
+			flowableEmitterMap.remove(reqId);
+		}
 	}
 
 	//! [scannerparameters]

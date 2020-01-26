@@ -71,47 +71,47 @@ public class Testbed2 {
         //Thread.sleep(1000);
         /*** Taking over orders to be submitted via TWS ***/
         //! [reqautoopenorders]
-        client.reqAutoOpenOrders(true);
+//        client.reqAutoOpenOrders(true);
         //! [reqautoopenorders]
         //Thread.sleep(1000);
         /*** Requesting this API client's orders ***/
         //! [reqopenorders]
-        client.reqOpenOrders();
+//        client.reqOpenOrders();
         //! [reqopenorders]
         //Thread.sleep(1000);
 
         /*** Placing/modifying an order - remember to ALWAYS increment the nextValidId after placing an order so it can be used for the next one! ***/
         //! [order_submission]
-        client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 1, 50));
+//        client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 1, 50));
         //! [order_submission]
 
         //! [faorderoneaccount]
-        Order faOrderOneAccount = OrderSamples.MarketOrder("BUY", 100);
+//        Order faOrderOneAccount = OrderSamples.MarketOrder("BUY", 100);
         // Specify the Account Number directly
-        faOrderOneAccount.account("DU119915");
-        client.placeOrder(nextOrderId++, ContractSamples.USStock(), faOrderOneAccount);
+//        faOrderOneAccount.account("DU119915");
+//        client.placeOrder(nextOrderId++, ContractSamples.USStock(), faOrderOneAccount);
         //! [faorderoneaccount]
 
         //! [faordergroupequalquantity]
-        Order faOrderGroupEQ = OrderSamples.LimitOrder("SELL", 200, 2000);
-        faOrderGroupEQ.faGroup("Group_Equal_Quantity");
-        faOrderGroupEQ.faMethod("EqualQuantity");
-        client.placeOrder(nextOrderId++, ContractSamples.USStock(), faOrderGroupEQ);
+//        Order faOrderGroupEQ = OrderSamples.LimitOrder("SELL", 200, 2000);
+//        faOrderGroupEQ.faGroup("Group_Equal_Quantity");
+//        faOrderGroupEQ.faMethod("EqualQuantity");
+//        client.placeOrder(nextOrderId++, ContractSamples.USStock(), faOrderGroupEQ);
         //! [faordergroupequalquantity]
 
         //! [faordergrouppctchange]
-        Order faOrderGroupPC = OrderSamples.MarketOrder("BUY", 0); ;
+//        Order faOrderGroupPC = OrderSamples.MarketOrder("BUY", 0); ;
         // You should not specify any order quantity for PctChange allocation method
-        faOrderGroupPC.faGroup("Pct_Change");
-        faOrderGroupPC.faMethod("PctChange");
-        faOrderGroupPC.faPercentage("100");
-        client.placeOrder(nextOrderId++, ContractSamples.EurGbpFx(), faOrderGroupPC);
+//        faOrderGroupPC.faGroup("Pct_Change");
+//        faOrderGroupPC.faMethod("PctChange");
+//        faOrderGroupPC.faPercentage("100");
+//        client.placeOrder(nextOrderId++, ContractSamples.EurGbpFx(), faOrderGroupPC);
         //! [faordergrouppctchange]
 
         //! [faorderprofile]
-        Order faOrderProfile = OrderSamples.LimitOrder("BUY", 200, 100);
-        faOrderProfile.faProfile("Percent_60_40");
-        client.placeOrder(nextOrderId++, ContractSamples.EuropeanStock(), faOrderProfile);
+//        Order faOrderProfile = OrderSamples.LimitOrder("BUY", 200, 100);
+//        faOrderProfile.faProfile("Percent_60_40");
+//        client.placeOrder(nextOrderId++, ContractSamples.EuropeanStock(), faOrderProfile);
         //! [faorderprofile]
 
 		//client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.PeggedToMarket("BUY", 10, 0.01));
@@ -119,7 +119,7 @@ public class Testbed2 {
         //client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.Discretionary("SELL", 1, 45, 0.5));
 
         //! [reqexecutions]
-        client.reqExecutions(10001, new ExecutionFilter());
+//        client.reqExecutions(10001, new ExecutionFilter());
         //! [reqexecutions]
 
         Thread.sleep(10000);

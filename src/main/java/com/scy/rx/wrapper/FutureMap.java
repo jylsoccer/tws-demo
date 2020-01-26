@@ -8,6 +8,9 @@ import java.util.concurrent.CompletableFuture;
 
 @Repository
 public class FutureMap {
+
+    public static final Integer KEY_REQID = -1;
+
     private LinkedHashMap<Integer, CompletableFuture> supplierMap = new LinkedHashMap<Integer, CompletableFuture>() {
         private static final long serialVersionUID = 1L;
         @Override

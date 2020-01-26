@@ -23,4 +23,9 @@ public class FlowableEmitterMap {
     public FlowableEmitter get(Integer key) {
         return flowableEmitterMap.get(key);
     }
+
+    public FlowableEmitter remove(Integer key) {
+        return flowableEmitterMap.remove(key);
+    }
+
 }
