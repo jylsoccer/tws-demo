@@ -3,6 +3,7 @@ package com.scy.rx.wrapper;
 import com.ib.client.*;
 import com.scy.rx.model.HistoricalDataResponse;
 import com.scy.rx.model.OpenOrderResponse;
+import com.scy.rx.model.OrderStatusResponse;
 import io.reactivex.FlowableEmitter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
@@ -103,6 +103,17 @@ public class MultiplexWrapperImpl implements EWrapper {
 		System.out.println("OrderStatus. Id: "+orderId+", Status: "+status+", Filled"+filled+", Remaining: "+remaining
                 +", AvgFillPrice: "+avgFillPrice+", PermId: "+permId+", ParentId: "+parentId+", LastFillPrice: "+lastFillPrice+
                 ", ClientId: "+clientId+", WhyHeld: "+whyHeld);
+		OrderStatusResponse response = new OrderStatusResponse(orderId, status, filled, remaining, avgFillPrice, permId, parentId,
+				lastFillPrice, clientId, whyHeld);
+
+		CompletableFuture<OrderStatusResponse> future = futureMap.get(orderId);
+		if (future == null) {
+			log.warn("orderStatus, orderId:{} not found.", orderId);
+		}
+		if (future != null) {
+			future.complete(response);
+			futureMap.remove(orderId);
+		}
 	}
 	//! [orderstatus]
 	
@@ -116,15 +127,9 @@ public class MultiplexWrapperImpl implements EWrapper {
 		FlowableEmitter<OpenOrderResponse> emitter = flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS);
 		if (emitter != null) {
 			emitter.onNext(response);
+			return;
 		}
-		CompletableFuture<OpenOrderResponse> future = futureMap.get(orderId);
-		if (future != null) {
-			future.complete(response);
-			futureMap.remove(orderId);
-		}
-		if (emitter == null && future == null) {
-			log.warn("openOrder, no registered listener. orderId:{}", orderId);
-		}
+		log.warn("openOrder, no registered listener. orderId:{}", orderId);
 	}
 	//! [openorder]
 	

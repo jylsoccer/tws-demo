@@ -2,6 +2,7 @@ package com.scy.rx.service.impl;
 
 import com.scy.rx.client.EConnClient;
 import com.scy.rx.model.OpenOrderResponse;
+import com.scy.rx.model.OrderStatusResponse;
 import com.scy.rx.model.PlaceOrderRequest;
 import com.scy.rx.service.TraderApi;
 import com.scy.rx.wrapper.FlowableEmitterMap;
@@ -44,10 +45,25 @@ public class TradeApiImpl implements TraderApi {
     }
 
     @Override
-    public CompletableFuture<OpenOrderResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
-        CompletableFuture<OpenOrderResponse> future = new CompletableFuture<>();
+    public synchronized CompletableFuture<OrderStatusResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
+        if (futureMap.get(placeOrderRequest.getReqId()) != null) {
+            throw new RuntimeException("placeOrder is not available.");
+        }
+        CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
         futureMap.put(placeOrderRequest.getReqId(), future);
         eConnClient.getClientSocket().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
+        return future;
+    }
+
+    @Override
+    public synchronized CompletableFuture<OrderStatusResponse> cancelOrder(int orderId) {
+        if (futureMap.get(orderId) != null) {
+            throw new RuntimeException("cancelOrder is not available.");
+        }
+        CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
+        futureMap.put(orderId, future);
+        log.info("cancelOrder, orderId:{}", orderId);
+        eConnClient.getClientSocket().cancelOrder(orderId);
         return future;
     }
 

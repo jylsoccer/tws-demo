@@ -1,8 +1,10 @@
 package com.scy.rx.service;
 
 
+import com.alibaba.fastjson.JSON;
 import com.scy.rx.TestDemo;
 import com.scy.rx.model.OpenOrderResponse;
+import com.scy.rx.model.OrderStatusResponse;
 import com.scy.rx.model.PlaceOrderRequest;
 import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
@@ -39,11 +41,37 @@ public class TradeApiServiceTest {
 
     @Test
     public void test_placeOrder() throws Exception {
-        CompletableFuture<OpenOrderResponse> future = traderApi.placeOrder(new PlaceOrderRequest(traderApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
+        CompletableFuture<OrderStatusResponse> future = traderApi.placeOrder(new PlaceOrderRequest(traderApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
         future.thenAccept(
                 response -> log.info("OpenOrderResponse:{}", response)
         );
         Thread.sleep(10000);
+    }
+
+    @Test
+    public void test_cancelOrder() throws Exception {
+        // 下单
+        CompletableFuture<OrderStatusResponse> future = traderApi.placeOrder(new PlaceOrderRequest(traderApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 4, 50)));
+        future.thenAccept(
+                placeOrderResp -> {
+                    log.info("placeOrderResp:{}", placeOrderResp);
+                    // 查询所有未成交订单
+                    traderApi.reqAllOpenOrders()
+                            .subscribeOn(Schedulers.newThread())
+                            .subscribe(
+                                    openOrder -> {
+                                        log.info("openOrder:{}", openOrder);
+                                        // 撤销订单
+                                        traderApi.cancelOrder(openOrder.getOrderId())
+                                                .thenAccept(orderResponse -> {
+                                                    log.info("cancelOrder:{}", JSON.toJSONString(orderResponse));
+                                                });
+                                    }
+                            );
+                }
+        );
+
+        Thread.sleep(100000);
     }
 
     @Test

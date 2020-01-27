@@ -14,4 +14,20 @@ public class OrderStatusResponse {
     private double lastFillPrice;
     private int clientId;
     private String whyHeld;
+
+    public OrderStatusResponse() {
+    }
+
+    public OrderStatusResponse(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+        this.orderId = orderId;
+        this.status = status;
+        this.filled = filled;
+        this.remaining = remaining;
+        this.avgFillPrice = avgFillPrice;
+        this.permId = permId;
+        this.parentId = parentId;
+        this.lastFillPrice = lastFillPrice;
+        this.clientId = clientId;
+        this.whyHeld = whyHeld;
+    }
 }
