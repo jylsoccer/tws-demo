@@ -1,10 +1,7 @@
 package com.scy.rx.wrapper;
 
 import com.ib.client.*;
-import com.scy.rx.model.ExecDetailsResponse;
-import com.scy.rx.model.HistoricalDataResponse;
-import com.scy.rx.model.OpenOrderResponse;
-import com.scy.rx.model.OrderStatusResponse;
+import com.scy.rx.model.*;
 import io.reactivex.FlowableEmitter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +50,13 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
 		System.out.println("Tick Price. Ticker Id:"+tickerId+", Field: "+field+", Price: "+price+", CanAutoExecute: "+canAutoExecute);
+		TickPriceResponse response = new TickPriceResponse(tickerId, field, price, canAutoExecute);
+		FlowableEmitter<TickPriceResponse> emitter = flowableEmitterMap.get(tickerId);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
+		}
+		log.warn("tickPrice, emitter not registered. tickerId:{}", tickerId);
 	}
 	//! [tickprice]
 	
@@ -60,6 +64,13 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void tickSize(int tickerId, int field, int size) {
 		System.out.println("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
+		TickSizeResponse response = new TickSizeResponse(tickerId, field, size);
+		FlowableEmitter<TickSizeResponse> emitter = flowableEmitterMap.get(tickerId);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
+		}
+		log.warn("tickSize, emitter not registered. tickerId:{}", tickerId);
 	}
 	//! [ticksize]
 	
@@ -279,7 +290,7 @@ public class MultiplexWrapperImpl implements EWrapper {
 		HistoricalDataResponse response = new HistoricalDataResponse(reqId, date, open, high, low, close, volume, count, WAP, hasGaps);
 		FlowableEmitter<HistoricalDataResponse> emitter = flowableEmitterMap.get(reqId);
 		if (emitter == null) {
-			log.error("historicalData, emitter not registered. tickerId:{}", reqId);
+			log.warn("historicalData, emitter not registered. tickerId:{}", reqId);
 			return;
 		}
 		emitter.onNext(response);
@@ -430,6 +441,17 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void error(int id, int errorCode, String errorMsg) {
 		System.out.println("Error. Id: " + id + ", Code: " + errorCode + ", Msg: " + errorMsg + "\n");
+		FlowableEmitter emitter = flowableEmitterMap.remove(id);
+		if (emitter != null) {
+			emitter.onError(new RuntimeException(String.format("code:%d, msg:%s.", errorCode, errorMsg)));
+			log.warn("flowableEmitterMap key:{} removed.", id);
+		}
+
+		CompletableFuture future = futureMap.remove(id);
+		if (future != null) {
+			future.completeExceptionally(new RuntimeException(String.format("code:%d, msg:%s.", errorCode, errorMsg)));
+			log.warn("futureMap key:{} removed.", id);
+		}
 	}
 	//! [error]
 	@Override

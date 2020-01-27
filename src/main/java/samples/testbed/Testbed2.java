@@ -43,7 +43,7 @@ public class Testbed2 {
 
 		wrapper.getClient().reqIds(-1);
 		Thread.sleep(1000);
-		orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
+//		orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
 //		contractOperations(wrapper.getClient());
 //        hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());
 //        testAlgoSamples(wrapper.getClient(), wrapper.getCurrentOrderId());
@@ -53,7 +53,12 @@ public class Testbed2 {
         //marketDataType(wrapper.getClient());
 //        historicalDataRequests(wrapper.getClient());
 //        accountOperations(wrapper.getClient());
-		
+		marketDataType(wrapper.getClient());
+		wrapper.getClient().reqMktData(1004, ContractSamples.USStock(), "233,236,258", false, null);
+		Thread.sleep(10);
+
+		wrapper.getClient().cancelMktData(1004);
+
 		Thread.sleep(100000);
 		m_client.eDisconnect();
 	}
@@ -546,7 +551,7 @@ public class Testbed2 {
 		
 		//! [reqmarketdatatype]
         /*** Switch to live (1) frozen (2) delayed (3) or delayed frozen (4)***/
-        client.reqMarketDataType(2);
+        client.reqMarketDataType(3);
         //! [reqmarketdatatype]
 		
 	}
