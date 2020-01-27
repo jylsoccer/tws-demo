@@ -15,6 +15,9 @@ public class HistoricalDataResponse {
     private double wap;
     private boolean hasGaps;
 
+    public HistoricalDataResponse() {
+    }
+
     public HistoricalDataResponse(int reqId, String date, double open, double high, double low, double close, int volume, int count, double wap, boolean hasGaps) {
         this.reqId = reqId;
         this.date = date;

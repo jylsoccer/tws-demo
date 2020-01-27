@@ -8,6 +8,8 @@ import java.util.Map;
 
 @Repository
 public class FlowableEmitterMap {
+    public static final Integer KEY_REQ_ALL_OPEN_ORDERS = -1;
+
     private LinkedHashMap<Integer, FlowableEmitter> flowableEmitterMap = new LinkedHashMap<Integer, FlowableEmitter>() {
         private static final long serialVersionUID = 1L;
         @Override
@@ -17,7 +19,7 @@ public class FlowableEmitterMap {
     };
 
     public FlowableEmitter put(Integer key, FlowableEmitter emitter) {
-        return flowableEmitterMap.put(key, emitter);
+        return flowableEmitterMap.putIfAbsent(key, emitter);
     }
 
     public FlowableEmitter get(Integer key) {

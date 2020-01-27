@@ -1,5 +1,6 @@
 package samples.testbed;
 
+import com.alibaba.fastjson.JSON;
 import com.ib.client.*;
 
 import java.util.Set;
@@ -96,6 +97,8 @@ public class EWrapperImpl implements EWrapper {
 			OrderState orderState) {
 		System.out.println("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
 			order.action()+", "+order.orderType()+" "+order.totalQuantity()+", "+orderState.status());
+		System.out.println("OpenOrder. contract: " + JSON.toJSONString(contract) + ", order: " + JSON.toJSONString(order));
+
 	}
 	//! [openorder]
 	

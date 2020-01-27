@@ -41,6 +41,8 @@ public class Testbed2 {
         //! [ereader]
 //        Thread.sleep(1000);
 
+		wrapper.getClient().reqIds(-1);
+		Thread.sleep(1000);
 		orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
 //		contractOperations(wrapper.getClient());
 //        hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());
@@ -61,12 +63,12 @@ public class Testbed2 {
 		/*** Requesting the next valid id ***/
 		//! [reqids]
         //The parameter is always ignored.
-        client.reqIds(-1);
+//        client.reqIds(-1);
         //! [reqids]
         //Thread.sleep(1000);
         /*** Requesting all open orders ***/
         //! [reqallopenorders]
-        client.reqAllOpenOrders();
+//        client.reqAllOpenOrders();
         //! [reqallopenorders]
         //Thread.sleep(1000);
         /*** Taking over orders to be submitted via TWS ***/
@@ -82,7 +84,7 @@ public class Testbed2 {
 
         /*** Placing/modifying an order - remember to ALWAYS increment the nextValidId after placing an order so it can be used for the next one! ***/
         //! [order_submission]
-//        client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 1, 50));
+//        client.placeOrder(nextOrderId, ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 1, 50));
         //! [order_submission]
 
         //! [faorderoneaccount]
@@ -119,7 +121,7 @@ public class Testbed2 {
         //client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.Discretionary("SELL", 1, 45, 0.5));
 
         //! [reqexecutions]
-//        client.reqExecutions(10001, new ExecutionFilter());
+//        client.reqExecutions(nextOrderId, new ExecutionFilter());
         //! [reqexecutions]
 
         Thread.sleep(10000);

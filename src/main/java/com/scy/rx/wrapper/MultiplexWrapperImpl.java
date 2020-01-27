@@ -2,6 +2,7 @@ package com.scy.rx.wrapper;
 
 import com.ib.client.*;
 import com.scy.rx.model.HistoricalDataResponse;
+import com.scy.rx.model.OpenOrderResponse;
 import io.reactivex.FlowableEmitter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
+import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
 @Slf4j
@@ -107,8 +110,21 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void openOrder(int orderId, Contract contract, Order order,
 			OrderState orderState) {
-		System.out.println("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
+		log.info("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
 			order.action()+", "+order.orderType()+" "+order.totalQuantity()+", "+orderState.status());
+		OpenOrderResponse response = new OpenOrderResponse(orderId, contract, order, orderState);
+		FlowableEmitter<OpenOrderResponse> emitter = flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS);
+		if (emitter != null) {
+			emitter.onNext(response);
+		}
+		CompletableFuture<OpenOrderResponse> future = futureMap.get(orderId);
+		if (future != null) {
+			future.complete(response);
+			futureMap.remove(orderId);
+		}
+		if (emitter == null && future == null) {
+			log.warn("openOrder, no registered listener. orderId:{}", orderId);
+		}
 	}
 	//! [openorder]
 	
@@ -116,7 +132,14 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void openOrderEnd() {
 		System.out.println("OpenOrderEnd");
+		FlowableEmitter<OpenOrderResponse> emitter = flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS);
+		if (emitter != null) {
+			emitter.onComplete();
+			flowableEmitterMap.remove(KEY_REQ_ALL_OPEN_ORDERS);
+			log.info("openOrderEnd, KEY_REQ_ALL_OPEN_ORDERS removed.");
+		}
 	}
+
 	//! [openorderend]
 	
 	//! [updateaccountvalue]
@@ -244,6 +267,7 @@ public class MultiplexWrapperImpl implements EWrapper {
 		if (date.startsWith("finished-")) {
 			emitter.onComplete();
 			flowableEmitterMap.remove(reqId);
+			log.info("historicalData finished, {} removed.", reqId);
 		}
 	}
 

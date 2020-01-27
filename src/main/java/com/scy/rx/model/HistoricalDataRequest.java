@@ -18,6 +18,9 @@ public class HistoricalDataRequest {
     private int formatDate;
     private List<TagValue> chartOptions;
 
+    public HistoricalDataRequest() {
+    }
+
     public HistoricalDataRequest(int tickerId, Contract contract, String endDateTime, String durationString, String barSizeSetting, String whatToShow, int useRTH, int formatDate, List<TagValue> chartOptions) {
         this.tickerId = tickerId;
         this.contract = contract;

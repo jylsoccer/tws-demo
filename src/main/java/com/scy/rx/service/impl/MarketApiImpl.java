@@ -1,6 +1,5 @@
 package com.scy.rx.service.impl;
 
-import com.ib.client.EClientSocket;
 import com.scy.rx.client.EConnClient;
 import com.scy.rx.model.HistoricalDataRequest;
 import com.scy.rx.model.HistoricalDataResponse;
@@ -21,13 +20,16 @@ public class MarketApiImpl implements MarketApi {
     private EConnClient eConnClient;
 
     @Override
-    public Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {
-        EClientSocket client = eConnClient.getClientSocket();
-        client.reqHistoricalData(request.getTickerId(), request.getContract(), request.getEndDateTime(),
-                request.getDurationString(), request.getBarSizeSetting(),
-                request.getWhatToShow(), request.getUseRTH(), request.getFormatDate(), request.getChartOptions());
-
-        return Flowable.create(emitter -> flowableEmitterMap.put(request.getTickerId(), emitter),
-                BackpressureStrategy.BUFFER);
+    public synchronized Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {
+        if (flowableEmitterMap.get(request.getTickerId()) != null) {
+            throw new RuntimeException("historicalDataRequests is not available.");
+        }
+        return Flowable.<HistoricalDataResponse>create(emitter -> {
+                    flowableEmitterMap.put(request.getTickerId(), emitter);
+                    eConnClient.getClientSocket().reqHistoricalData(request.getTickerId(), request.getContract(), request.getEndDateTime(),
+                            request.getDurationString(), request.getBarSizeSetting(),
+                            request.getWhatToShow(), request.getUseRTH(), request.getFormatDate(), request.getChartOptions());
+                },
+                BackpressureStrategy.BUFFER).cache();
     }
 }
