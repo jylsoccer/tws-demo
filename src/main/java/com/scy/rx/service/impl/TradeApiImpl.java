@@ -1,9 +1,8 @@
 package com.scy.rx.service.impl;
 
+import com.ib.client.ExecutionFilter;
 import com.scy.rx.client.EConnClient;
-import com.scy.rx.model.OpenOrderResponse;
-import com.scy.rx.model.OrderStatusResponse;
-import com.scy.rx.model.PlaceOrderRequest;
+import com.scy.rx.model.*;
 import com.scy.rx.service.TraderApi;
 import com.scy.rx.wrapper.FlowableEmitterMap;
 import com.scy.rx.wrapper.FutureMap;
@@ -65,6 +64,19 @@ public class TradeApiImpl implements TraderApi {
         log.info("cancelOrder, orderId:{}", orderId);
         eConnClient.getClientSocket().cancelOrder(orderId);
         return future;
+    }
+
+    @Override
+    public Flowable<ExecDetailsResponse> reqExecutions(ExecDetailsRequest request) {
+        if (flowableEmitterMap.get(request.getReqId()) != null) {
+            throw new RuntimeException("reqExecutions is not available.");
+        }
+        return Flowable.<ExecDetailsResponse>create(
+                emitter -> {
+                    flowableEmitterMap.put(request.getReqId(), emitter);
+                    eConnClient.getClientSocket().reqExecutions(request.getReqId(), request.getFilter());
+                },
+                BackpressureStrategy.BUFFER).cache();
     }
 
     @Override

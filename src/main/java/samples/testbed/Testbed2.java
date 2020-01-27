@@ -121,7 +121,7 @@ public class Testbed2 {
         //client.placeOrder(nextOrderId++, ContractSamples.USStock(), OrderSamples.Discretionary("SELL", 1, 45, 0.5));
 
         //! [reqexecutions]
-//        client.reqExecutions(nextOrderId, new ExecutionFilter());
+        client.reqExecutions(nextOrderId, new ExecutionFilter());
         //! [reqexecutions]
 
         Thread.sleep(10000);

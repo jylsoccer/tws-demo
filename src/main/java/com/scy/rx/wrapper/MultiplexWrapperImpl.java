@@ -1,6 +1,7 @@
 package com.scy.rx.wrapper;
 
 import com.ib.client.*;
+import com.scy.rx.model.ExecDetailsResponse;
 import com.scy.rx.model.HistoricalDataResponse;
 import com.scy.rx.model.OpenOrderResponse;
 import com.scy.rx.model.OrderStatusResponse;
@@ -213,6 +214,13 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void execDetails(int reqId, Contract contract, Execution execution) {
 		System.out.println("ExecDetails. "+reqId+" - ["+contract.symbol()+"], ["+contract.secType()+"], ["+contract.currency()+"], ["+execution.execId()+"], ["+execution.orderId()+"], ["+execution.shares()+"]");
+		ExecDetailsResponse response = new ExecDetailsResponse(reqId, contract, execution);
+		FlowableEmitter<ExecDetailsResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
+		}
+		log.warn("execDetails, no registered listener. reqId:{}", reqId);
 	}
 	//! [execdetails]
 	
@@ -220,6 +228,12 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void execDetailsEnd(int reqId) {
 		System.out.println("ExecDetailsEnd. "+reqId+"\n");
+		FlowableEmitter<ExecDetailsResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onComplete();
+			flowableEmitterMap.remove(reqId);
+			log.info("execDetailsEnd, {} removed.", reqId);
+		}
 	}
 	//! [execdetailsend]
 	

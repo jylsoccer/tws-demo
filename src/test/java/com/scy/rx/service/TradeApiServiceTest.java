@@ -2,7 +2,9 @@ package com.scy.rx.service;
 
 
 import com.alibaba.fastjson.JSON;
+import com.ib.client.ExecutionFilter;
 import com.scy.rx.TestDemo;
+import com.scy.rx.model.ExecDetailsRequest;
 import com.scy.rx.model.OpenOrderResponse;
 import com.scy.rx.model.OrderStatusResponse;
 import com.scy.rx.model.PlaceOrderRequest;
@@ -81,6 +83,16 @@ public class TradeApiServiceTest {
                 .subscribe(
                 response -> log.info("OpenOrderResponse:{}", response)
         );
+        Thread.sleep(20000);
+    }
+
+    @Test
+    public void test_reqExecutions() throws Exception {
+        traderApi.reqExecutions(new ExecDetailsRequest(traderApi.reqId(), new ExecutionFilter()))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(
+                        response -> log.info("reqExecutionsResp:{}", response)
+                );
         Thread.sleep(20000);
     }
 }
