@@ -54,10 +54,11 @@ public class Testbed2 {
 //        historicalDataRequests(wrapper.getClient());
 //        accountOperations(wrapper.getClient());
 		marketDataType(wrapper.getClient());
-		wrapper.getClient().reqMktData(1004, ContractSamples.USStock(), "233,236,258", false, null);
-		Thread.sleep(10);
+		Thread.sleep(2000);
 
-		wrapper.getClient().cancelMktData(1004);
+		wrapper.getClient().reqMktData(1004, ContractSamples.USStock(), "233,236,258", false, null);
+//
+//		wrapper.getClient().cancelMktData(1004);
 
 		Thread.sleep(100000);
 		m_client.eDisconnect();

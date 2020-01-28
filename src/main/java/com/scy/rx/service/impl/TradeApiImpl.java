@@ -32,12 +32,15 @@ public class TradeApiImpl implements TraderApi {
     private EConnClient eConnClient;
 
     @Override
-    public synchronized Integer reqId() throws Exception {
+    public synchronized Integer reqId() {
         try {
             CompletableFuture<Integer> future = new CompletableFuture<>();
             futureMap.put(KEY_REQID, future);
             eConnClient.getClientSocket().reqIds(KEY_REQID);
             return future.get(1, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("TradeApiImpl.reqId failed.", e);
+            throw new RuntimeException(e);
         } finally {
             futureMap.remove(KEY_REQID);
         }

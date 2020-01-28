@@ -10,7 +10,7 @@ public interface TraderApi {
 	/**
 	 * 查当前有效的reqId
 	 */
-	Integer reqId() throws Exception ;
+	Integer reqId();
 
 	/**
 	 * 下单

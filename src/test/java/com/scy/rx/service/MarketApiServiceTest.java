@@ -2,10 +2,12 @@ package com.scy.rx.service;
 
 
 import com.alibaba.fastjson.JSON;
+import com.ib.client.MarketDataType;
 import com.scy.rx.TestDemo;
 
 import com.scy.rx.client.EConnClient;
 import com.scy.rx.model.HistoricalDataRequest;
+import com.scy.rx.model.MktDataRequest;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -26,6 +28,9 @@ public class MarketApiServiceTest {
     @Autowired
     private MarketApi marketApi;
 
+    @Autowired
+    private TraderApi traderApi;
+
     @Test
     public void test() throws Exception {
         log.info("test begin");
@@ -45,5 +50,21 @@ public class MarketApiServiceTest {
         SimpleDateFormat form = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
         String formatted = form.format(cal.getTime());
         return new HistoricalDataRequest(4001, ContractSamples.EurGbpFx(), formatted, "1 M", "1 day", "MIDPOINT", 1, 1, null);
+    }
+
+    @Test
+    public void test_reqMktData() throws Exception {
+        marketApi.reqMarketDataType(MarketDataType.DELAYED);
+        int reqId = traderApi.reqId();
+        marketApi.reqMktData(new MktDataRequest(reqId, ContractSamples.USStock(), "", false, null))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(tickResponse -> {
+                            log.info("tickResponse:{}", JSON.toJSONString(tickResponse));
+                        },
+                        error -> {
+                            log.error("reqMktData error.", error);
+                        });
+
+        Thread.sleep(10000);
     }
 }

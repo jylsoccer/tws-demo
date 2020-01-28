@@ -441,16 +441,14 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void error(int id, int errorCode, String errorMsg) {
 		System.out.println("Error. Id: " + id + ", Code: " + errorCode + ", Msg: " + errorMsg + "\n");
-		FlowableEmitter emitter = flowableEmitterMap.remove(id);
+		FlowableEmitter emitter = flowableEmitterMap.get(id);
 		if (emitter != null) {
 			emitter.onError(new RuntimeException(String.format("code:%d, msg:%s.", errorCode, errorMsg)));
-			log.warn("flowableEmitterMap key:{} removed.", id);
 		}
 
-		CompletableFuture future = futureMap.remove(id);
+		CompletableFuture future = futureMap.get(id);
 		if (future != null) {
 			future.completeExceptionally(new RuntimeException(String.format("code:%d, msg:%s.", errorCode, errorMsg)));
-			log.warn("futureMap key:{} removed.", id);
 		}
 	}
 	//! [error]
