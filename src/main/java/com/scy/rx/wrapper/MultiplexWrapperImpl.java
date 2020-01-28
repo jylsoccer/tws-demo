@@ -397,6 +397,13 @@ public class MultiplexWrapperImpl implements EWrapper {
 	public void accountSummary(int reqId, String account, String tag,
 			String value, String currency) {
 		System.out.println("Acct Summary. ReqId: " + reqId + ", Acct: " + account + ", Tag: " + tag + ", Value: " + value + ", Currency: " + currency);
+		AccountSummaryResponse response = new AccountSummaryResponse(reqId, account, tag, value, currency);
+		FlowableEmitter<AccountSummaryResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
+		}
+		log.warn("accountSummary, emitter not registered. reqId:{}", reqId);
 	}
 	//! [accountsummary]
 	
@@ -404,6 +411,12 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void accountSummaryEnd(int reqId) {
 		System.out.println("AccountSummaryEnd. Req Id: "+reqId+"\n");
+		FlowableEmitter<AccountSummaryResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onComplete();
+			flowableEmitterMap.remove(reqId);
+			log.info("accountSummaryEnd, reqId:{} removed.", reqId);
+		}
 	}
 	//! [accountsummaryend]
 	@Override

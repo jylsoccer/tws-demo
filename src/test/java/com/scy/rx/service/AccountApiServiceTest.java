@@ -3,6 +3,8 @@ package com.scy.rx.service;
 
 import com.alibaba.fastjson.JSON;
 import com.scy.rx.TestDemo;
+import com.scy.rx.model.AccountSummaryRequest;
+import com.scy.rx.model.AccountSummaryResponse;
 import com.scy.rx.model.PositionsMultiRequest;
 import com.scy.rx.model.PositionsMultiResponse;
 import io.reactivex.Flowable;
@@ -59,5 +61,22 @@ public class AccountApiServiceTest {
                         });
         Thread.sleep(10000);
     }
+
+    @Test
+    public void test_reqAccountSummary() throws Exception {
+        Flowable<AccountSummaryResponse> flowable = accountApi.reqAccountSummary(new AccountSummaryRequest(9001, "All", "AccountType,NetLiquidation,TotalCashValue"));
+        flowable.subscribeOn(Schedulers.newThread())
+                .subscribe(response -> {
+                            log.info("account summary:{}", JSON.toJSONString(response));
+                        },
+                        error -> {
+                            log.error("reqAccountSummary error.", error);
+                        },
+                        () -> {
+                            log.info("account end");
+                        });
+        Thread.sleep(10000);
+    }
+
 
 }

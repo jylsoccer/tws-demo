@@ -1,5 +1,7 @@
 package com.scy.rx.service;
 
+import com.scy.rx.model.AccountSummaryRequest;
+import com.scy.rx.model.AccountSummaryResponse;
 import com.scy.rx.model.PositionsMultiRequest;
 import com.scy.rx.model.PositionsMultiResponse;
 import io.reactivex.Flowable;
@@ -21,4 +23,14 @@ public interface AccountApi {
 	 * 查持仓股票
 	 */
 	Flowable<PositionsMultiResponse> reqPositionsMulti(PositionsMultiRequest request);
+
+	/**
+	 * 查账户信息
+	 */
+	Flowable<AccountSummaryResponse> reqAccountSummary(AccountSummaryRequest request);
+
+	/**
+	 * 取消账户信息查询
+	 */
+	void cancelAccountSummary(int reqId);
 }

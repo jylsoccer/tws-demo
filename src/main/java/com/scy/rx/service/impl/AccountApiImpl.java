@@ -2,6 +2,8 @@ package com.scy.rx.service.impl;
 
 
 import com.scy.rx.client.EConnClient;
+import com.scy.rx.model.AccountSummaryRequest;
+import com.scy.rx.model.AccountSummaryResponse;
 import com.scy.rx.model.PositionsMultiRequest;
 import com.scy.rx.model.PositionsMultiResponse;
 import com.scy.rx.service.AccountApi;
@@ -68,5 +70,28 @@ public class AccountApiImpl implements AccountApi {
             }
         }
         throw new RuntimeException("try lock failed.");
+    }
+
+    @Override
+    public Flowable<AccountSummaryResponse> reqAccountSummary(AccountSummaryRequest request) {
+        if (FlowableEmitterMap.tryLock()) {
+            try {
+                if (flowableEmitterMap.get(request.getReqId()) != null) {
+                    throw new RuntimeException("reqAccountSummary is not available.");
+                }
+                return Flowable.<AccountSummaryResponse>create(emitter -> {
+                            flowableEmitterMap.put(request.getReqId(), emitter);
+                            eConnClient.getClientSocket().reqAccountSummary(request.getReqId(), request.getGroup(), request.getTags());
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.unlock();
+            }
+        }
+        throw new RuntimeException("try lock failed.");    }
+
+    @Override
+    public void cancelAccountSummary(int reqId) {
+        eConnClient.getClientSocket().cancelAccountSummary(reqId);
     }
 }
