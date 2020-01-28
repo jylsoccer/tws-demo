@@ -1,6 +1,5 @@
 package com.scy.rx.service.impl;
 
-import com.ib.client.ExecutionFilter;
 import com.scy.rx.client.EConnClient;
 import com.scy.rx.model.*;
 import com.scy.rx.service.TraderApi;
@@ -32,66 +31,98 @@ public class TradeApiImpl implements TraderApi {
     private EConnClient eConnClient;
 
     @Override
-    public synchronized Integer reqId() {
-        try {
-            CompletableFuture<Integer> future = new CompletableFuture<>();
-            futureMap.put(KEY_REQID, future);
-            eConnClient.getClientSocket().reqIds(KEY_REQID);
-            return future.get(1, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            log.error("TradeApiImpl.reqId failed.", e);
-            throw new RuntimeException(e);
-        } finally {
-            futureMap.remove(KEY_REQID);
+    public Integer reqId() {
+        if (FutureMap.lock.tryLock()) {
+            try {
+                CompletableFuture<Integer> future = new CompletableFuture<>();
+                futureMap.put(KEY_REQID, future);
+                eConnClient.getClientSocket().reqIds(KEY_REQID);
+                return future.get(1, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                log.error("TradeApiImpl.reqId failed.", e);
+                throw new RuntimeException(e);
+            } finally {
+                futureMap.remove(KEY_REQID);
+                FutureMap.lock.unlock();
+            }
         }
+        throw new RuntimeException("try lock failed.");
     }
 
     @Override
-    public synchronized CompletableFuture<OrderStatusResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
-        if (futureMap.get(placeOrderRequest.getReqId()) != null) {
-            throw new RuntimeException("placeOrder is not available.");
+    public CompletableFuture<OrderStatusResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
+        if (FutureMap.lock.tryLock()) {
+            try {
+                if (futureMap.get(placeOrderRequest.getReqId()) != null) {
+                    throw new RuntimeException("placeOrder is not available.");
+                }
+                CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
+                futureMap.put(placeOrderRequest.getReqId(), future);
+                eConnClient.getClientSocket().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
+                return future;
+            } finally {
+                FutureMap.lock.unlock();
+            }
         }
-        CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
-        futureMap.put(placeOrderRequest.getReqId(), future);
-        eConnClient.getClientSocket().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
-        return future;
+        throw new RuntimeException("try lock failed.");
     }
 
     @Override
-    public synchronized CompletableFuture<OrderStatusResponse> cancelOrder(int orderId) {
-        if (futureMap.get(orderId) != null) {
-            throw new RuntimeException("cancelOrder is not available.");
+    public CompletableFuture<OrderStatusResponse> cancelOrder(int orderId) {
+        if (FutureMap.lock.tryLock()) {
+            try {
+                if (futureMap.get(orderId) != null) {
+                    throw new RuntimeException("cancelOrder is not available.");
+                }
+                CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
+                futureMap.put(orderId, future);
+                log.info("cancelOrder, orderId:{}", orderId);
+                eConnClient.getClientSocket().cancelOrder(orderId);
+                return future;
+            } finally {
+                FutureMap.lock.unlock();
+            }
         }
-        CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
-        futureMap.put(orderId, future);
-        log.info("cancelOrder, orderId:{}", orderId);
-        eConnClient.getClientSocket().cancelOrder(orderId);
-        return future;
+        throw new RuntimeException("try lock failed.");
     }
 
     @Override
     public Flowable<ExecDetailsResponse> reqExecutions(ExecDetailsRequest request) {
-        if (flowableEmitterMap.get(request.getReqId()) != null) {
-            throw new RuntimeException("reqExecutions is not available.");
+        if (FlowableEmitterMap.lock.tryLock()) {
+            try {
+                if (flowableEmitterMap.get(request.getReqId()) != null) {
+                    throw new RuntimeException("reqExecutions is not available.");
+                }
+                return Flowable.<ExecDetailsResponse>create(
+                        emitter -> {
+                            flowableEmitterMap.put(request.getReqId(), emitter);
+                            eConnClient.getClientSocket().reqExecutions(request.getReqId(), request.getFilter());
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.lock.unlock();
+            }
         }
-        return Flowable.<ExecDetailsResponse>create(
-                emitter -> {
-                    flowableEmitterMap.put(request.getReqId(), emitter);
-                    eConnClient.getClientSocket().reqExecutions(request.getReqId(), request.getFilter());
-                },
-                BackpressureStrategy.BUFFER).cache();
+        throw new RuntimeException("try lock failed.");
     }
 
     @Override
-    public synchronized Flowable<OpenOrderResponse> reqAllOpenOrders() {
-        if (flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS) != null) {
-            throw new RuntimeException("reqAllOpenOrders is not available.");
+    public Flowable<OpenOrderResponse> reqAllOpenOrders() {
+        if (FlowableEmitterMap.lock.tryLock()) {
+            try {
+                if (flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS) != null) {
+                    throw new RuntimeException("reqAllOpenOrders is not available.");
+                }
+                return Flowable.<OpenOrderResponse>create(
+                        emitter -> {
+                            flowableEmitterMap.put(KEY_REQ_ALL_OPEN_ORDERS, emitter);
+                            eConnClient.getClientSocket().reqAllOpenOrders();
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.lock.unlock();
+            }
         }
-        return Flowable.<OpenOrderResponse>create(
-                emitter -> {
-                    flowableEmitterMap.put(KEY_REQ_ALL_OPEN_ORDERS, emitter);
-                    eConnClient.getClientSocket().reqAllOpenOrders();
-                },
-                BackpressureStrategy.BUFFER).cache();
+        throw new RuntimeException("try lock failed.");
     }
 }

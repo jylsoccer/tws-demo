@@ -22,30 +22,44 @@ public class MarketApiImpl implements MarketApi {
     private EConnClient eConnClient;
 
     @Override
-    public synchronized Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {
-        if (flowableEmitterMap.get(request.getTickerId()) != null) {
-            throw new RuntimeException("historicalDataRequests is not available.");
+    public Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {
+        if (FlowableEmitterMap.lock.tryLock()) {
+            try {
+                if (flowableEmitterMap.get(request.getTickerId()) != null) {
+                    throw new RuntimeException("historicalDataRequests is not available.");
+                }
+                return Flowable.<HistoricalDataResponse>create(emitter -> {
+                            flowableEmitterMap.put(request.getTickerId(), emitter);
+                            eConnClient.getClientSocket().reqHistoricalData(request.getTickerId(), request.getContract(), request.getEndDateTime(),
+                                    request.getDurationString(), request.getBarSizeSetting(),
+                                    request.getWhatToShow(), request.getUseRTH(), request.getFormatDate(), request.getChartOptions());
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.lock.unlock();
+            }
         }
-        return Flowable.<HistoricalDataResponse>create(emitter -> {
-                    flowableEmitterMap.put(request.getTickerId(), emitter);
-                    eConnClient.getClientSocket().reqHistoricalData(request.getTickerId(), request.getContract(), request.getEndDateTime(),
-                            request.getDurationString(), request.getBarSizeSetting(),
-                            request.getWhatToShow(), request.getUseRTH(), request.getFormatDate(), request.getChartOptions());
-                },
-                BackpressureStrategy.BUFFER).cache();
+        throw new RuntimeException("try lock failed.");
     }
 
     @Override
     public Flowable<TickResponse> reqMktData(MktDataRequest request) {
-        if (flowableEmitterMap.get(request.getTickerId()) != null) {
-            throw new RuntimeException("reqMktData is not available.");
+        if (FlowableEmitterMap.lock.tryLock()) {
+            try {
+                if (flowableEmitterMap.get(request.getTickerId()) != null) {
+                    throw new RuntimeException("reqMktData is not available.");
+                }
+                return Flowable.<TickResponse>create(emitter -> {
+                            flowableEmitterMap.put(request.getTickerId(), emitter);
+                            eConnClient.getClientSocket().reqMktData(request.getTickerId(), request.getContract(), request.getGenericTickList(),
+                                    request.isSnapshot(), request.getMktDataOptions());
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.lock.unlock();
+            }
         }
-        return Flowable.<TickResponse>create(emitter -> {
-                    flowableEmitterMap.put(request.getTickerId(), emitter);
-                    eConnClient.getClientSocket().reqMktData(request.getTickerId(), request.getContract(), request.getGenericTickList(),
-                            request.isSnapshot(), request.getMktDataOptions());
-                },
-                BackpressureStrategy.BUFFER).cache();
+        throw new RuntimeException("try lock failed.");
     }
 
     @Override

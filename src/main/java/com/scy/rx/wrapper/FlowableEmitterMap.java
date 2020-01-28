@@ -5,10 +5,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Repository
 public class FlowableEmitterMap {
     public static final Integer KEY_REQ_ALL_OPEN_ORDERS = -1;
+
+    public static final ReentrantLock lock = new ReentrantLock();
 
     private LinkedHashMap<Integer, FlowableEmitter> flowableEmitterMap = new LinkedHashMap<Integer, FlowableEmitter>() {
         private static final long serialVersionUID = 1L;
