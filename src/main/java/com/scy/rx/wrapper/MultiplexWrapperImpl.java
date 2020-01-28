@@ -472,6 +472,13 @@ public class MultiplexWrapperImpl implements EWrapper {
 	public void positionMulti(int reqId, String account, String modelCode,
 			Contract contract, double pos, double avgCost) {
 		System.out.println("Position Multi. Request: " + reqId + ", Account: " + account + ", ModelCode: " + modelCode + ", Symbol: " + contract.symbol() + ", SecType: " + contract.secType() + ", Currency: " + contract.currency() + ", Position: " + pos + ", Avg cost: " + avgCost + "\n");
+		PositionsMultiResponse response = new PositionsMultiResponse(reqId, account, modelCode, contract, pos, avgCost);
+		FlowableEmitter<PositionsMultiResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
+		}
+		log.warn("positionMulti, no registered listener. reqId:{}", reqId);
 	}
 	//! [positionmulti]
 	
@@ -479,6 +486,12 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void positionMultiEnd(int reqId) {
 		System.out.println("Position Multi End. Request: " + reqId + "\n");
+		FlowableEmitter<PositionsMultiResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onComplete();
+			flowableEmitterMap.remove(reqId);
+			log.info("positionMultiEnd, {} removed.", reqId);
+		}
 	}
 	//! [positionmultiend]
 	

@@ -8,8 +8,6 @@ import com.scy.rx.model.HistoricalDataResponse;
 
 /**
  *  市场行情接口
- * @author Administrator
- *
  */
 public interface MarketApi {
 

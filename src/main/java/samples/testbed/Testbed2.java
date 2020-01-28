@@ -52,11 +52,26 @@ public class Testbed2 {
         //reutersFundamentals(wrapper.getClient());
         //marketDataType(wrapper.getClient());
 //        historicalDataRequests(wrapper.getClient());
-//        accountOperations(wrapper.getClient());
-		marketDataType(wrapper.getClient());
-		Thread.sleep(2000);
 
-		wrapper.getClient().reqMktData(1004, ContractSamples.USStock(), "233,236,258", false, null);
+//        accountOperations(wrapper.getClient());
+
+		//账户持仓
+		wrapper.getClient().reqPositionsMulti(9003, "DU1812147", "");
+//		wrapper.getClient().reqPositions();
+
+//		wrapper.getClient().reqAccountUpdatesMulti(9004, "DU1812147", "", true);
+//		wrapper.getClient().reqManagedAccts();
+//		wrapper.getClient().reqAccountSummary(9001, "All", "AccountType,NetLiquidation,TotalCashValue");
+		Thread.sleep(5000);
+//		System.out.println("wrapper.getClient().cancelAccountSummary(9001)");
+//		wrapper.getClient().cancelAccountSummary(9001);
+//		wrapper.getClient().reqAccountUpdates(true, "DU1812147");
+
+
+//		marketDataType(wrapper.getClient());
+//		Thread.sleep(2000);
+//
+//		wrapper.getClient().reqMktData(1004, ContractSamples.USStock(), "233,236,258", false, null);
 //
 //		wrapper.getClient().cancelMktData(1004);
 
