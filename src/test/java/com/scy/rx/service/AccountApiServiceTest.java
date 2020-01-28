@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TestDemo.class})
@@ -21,6 +24,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AccountApiServiceTest {
     @Autowired
     private AccountApi accountApi;
+
+    @Test
+    public void test_reqManagedAccts() throws Exception {
+        CompletableFuture<List<String>> future = accountApi.reqManagedAccts();
+        future.thenAccept(list -> {
+            Flowable<PositionsMultiResponse> flowable = accountApi.reqPositionsMulti(new PositionsMultiRequest(9003, list.get(0), ""));
+            flowable.subscribeOn(Schedulers.newThread())
+                    .subscribe(response -> {
+                                log.info("position:{}", JSON.toJSONString(response));
+                            },
+                            error -> {
+                                log.error("reqMktData error.", error);
+                            },
+                            () -> {
+                                log.info("position end");
+                            });
+        });
+        Thread.sleep(10000);
+    }
 
     @Test
     public void test_reqPositionsMulti() throws Exception {

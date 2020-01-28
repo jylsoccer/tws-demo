@@ -32,7 +32,7 @@ public class TradeApiImpl implements TraderApi {
 
     @Override
     public Integer reqId() {
-        if (FutureMap.lock.tryLock()) {
+        if (FutureMap.tryLock()) {
             try {
                 CompletableFuture<Integer> future = new CompletableFuture<>();
                 futureMap.put(KEY_REQID, future);
@@ -43,7 +43,7 @@ public class TradeApiImpl implements TraderApi {
                 throw new RuntimeException(e);
             } finally {
                 futureMap.remove(KEY_REQID);
-                FutureMap.lock.unlock();
+                FutureMap.unlock();
             }
         }
         throw new RuntimeException("try lock failed.");
@@ -51,7 +51,7 @@ public class TradeApiImpl implements TraderApi {
 
     @Override
     public CompletableFuture<OrderStatusResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
-        if (FutureMap.lock.tryLock()) {
+        if (FutureMap.tryLock()) {
             try {
                 if (futureMap.get(placeOrderRequest.getReqId()) != null) {
                     throw new RuntimeException("placeOrder is not available.");
@@ -61,7 +61,7 @@ public class TradeApiImpl implements TraderApi {
                 eConnClient.getClientSocket().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
                 return future;
             } finally {
-                FutureMap.lock.unlock();
+                FutureMap.unlock();
             }
         }
         throw new RuntimeException("try lock failed.");
@@ -69,7 +69,7 @@ public class TradeApiImpl implements TraderApi {
 
     @Override
     public CompletableFuture<OrderStatusResponse> cancelOrder(int orderId) {
-        if (FutureMap.lock.tryLock()) {
+        if (FutureMap.tryLock()) {
             try {
                 if (futureMap.get(orderId) != null) {
                     throw new RuntimeException("cancelOrder is not available.");
@@ -80,7 +80,7 @@ public class TradeApiImpl implements TraderApi {
                 eConnClient.getClientSocket().cancelOrder(orderId);
                 return future;
             } finally {
-                FutureMap.lock.unlock();
+                FutureMap.unlock();
             }
         }
         throw new RuntimeException("try lock failed.");
@@ -88,7 +88,7 @@ public class TradeApiImpl implements TraderApi {
 
     @Override
     public Flowable<ExecDetailsResponse> reqExecutions(ExecDetailsRequest request) {
-        if (FlowableEmitterMap.lock.tryLock()) {
+        if (FlowableEmitterMap.tryLock()) {
             try {
                 if (flowableEmitterMap.get(request.getReqId()) != null) {
                     throw new RuntimeException("reqExecutions is not available.");
@@ -100,7 +100,7 @@ public class TradeApiImpl implements TraderApi {
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
-                FlowableEmitterMap.lock.unlock();
+                FlowableEmitterMap.unlock();
             }
         }
         throw new RuntimeException("try lock failed.");
@@ -108,7 +108,7 @@ public class TradeApiImpl implements TraderApi {
 
     @Override
     public Flowable<OpenOrderResponse> reqAllOpenOrders() {
-        if (FlowableEmitterMap.lock.tryLock()) {
+        if (FlowableEmitterMap.tryLock()) {
             try {
                 if (flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS) != null) {
                     throw new RuntimeException("reqAllOpenOrders is not available.");
@@ -120,7 +120,7 @@ public class TradeApiImpl implements TraderApi {
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
-                FlowableEmitterMap.lock.unlock();
+                FlowableEmitterMap.unlock();
             }
         }
         throw new RuntimeException("try lock failed.");

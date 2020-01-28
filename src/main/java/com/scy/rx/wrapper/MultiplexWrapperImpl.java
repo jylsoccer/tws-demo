@@ -1,5 +1,6 @@
 package com.scy.rx.wrapper;
 
+import com.google.common.base.Splitter;
 import com.ib.client.*;
 import com.scy.rx.model.*;
 import io.reactivex.FlowableEmitter;
@@ -7,10 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
+import static com.scy.rx.wrapper.FutureMap.KEY_MANAGED_ACCOUNTS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
 @Slf4j
@@ -272,6 +276,12 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void managedAccounts(String accountsList) {
 		System.out.println("Account list: " +accountsList);
+		CompletableFuture<List<String>> future = futureMap.get(KEY_MANAGED_ACCOUNTS);
+		if (future != null) {
+			future.complete(Splitter.on(",").omitEmptyStrings().trimResults().splitToList(accountsList));
+			futureMap.remove(KEY_MANAGED_ACCOUNTS);
+		}
+		log.warn("managedAccounts, reqId:KEY_MANAGED_ACCOUNTS not found.");
 	}
 	//! [managedaccounts]
 

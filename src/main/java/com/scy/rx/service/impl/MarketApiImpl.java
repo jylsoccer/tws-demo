@@ -23,7 +23,7 @@ public class MarketApiImpl implements MarketApi {
 
     @Override
     public Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {
-        if (FlowableEmitterMap.lock.tryLock()) {
+        if (FlowableEmitterMap.tryLock()) {
             try {
                 if (flowableEmitterMap.get(request.getTickerId()) != null) {
                     throw new RuntimeException("historicalDataRequests is not available.");
@@ -36,7 +36,7 @@ public class MarketApiImpl implements MarketApi {
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
-                FlowableEmitterMap.lock.unlock();
+                FlowableEmitterMap.unlock();
             }
         }
         throw new RuntimeException("try lock failed.");
@@ -44,7 +44,7 @@ public class MarketApiImpl implements MarketApi {
 
     @Override
     public Flowable<TickResponse> reqMktData(MktDataRequest request) {
-        if (FlowableEmitterMap.lock.tryLock()) {
+        if (FlowableEmitterMap.tryLock()) {
             try {
                 if (flowableEmitterMap.get(request.getTickerId()) != null) {
                     throw new RuntimeException("reqMktData is not available.");
@@ -56,7 +56,7 @@ public class MarketApiImpl implements MarketApi {
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
-                FlowableEmitterMap.lock.unlock();
+                FlowableEmitterMap.unlock();
             }
         }
         throw new RuntimeException("try lock failed.");

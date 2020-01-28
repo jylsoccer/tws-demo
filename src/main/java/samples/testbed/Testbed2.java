@@ -56,11 +56,12 @@ public class Testbed2 {
 //        accountOperations(wrapper.getClient());
 
 		//账户持仓
-		wrapper.getClient().reqPositionsMulti(9003, "DU1812147", "");
+//		wrapper.getClient().reqPositionsMulti(9003, "DU1812147", "");
 //		wrapper.getClient().reqPositions();
 
 //		wrapper.getClient().reqAccountUpdatesMulti(9004, "DU1812147", "", true);
-//		wrapper.getClient().reqManagedAccts();
+
+		wrapper.getClient().reqManagedAccts();
 //		wrapper.getClient().reqAccountSummary(9001, "All", "AccountType,NetLiquidation,TotalCashValue");
 		Thread.sleep(5000);
 //		System.out.println("wrapper.getClient().cancelAccountSummary(9001)");
