@@ -4,6 +4,7 @@
 package com.scy.apidemo;
 
 
+import com.ib.client.EClientSocket;
 import com.scy.apidemo.util.IConnectionConfiguration.DefaultConnectionConfiguration;
 import com.ib.client.Types.NewsType;
 import com.ib.controller.ApiConnection.ILogger;
@@ -70,6 +71,14 @@ public class ApiDemo implements IConnectionHandler {
         }
         return m_controller;
     }
+
+    public static EClientSocket getClient() {
+		return INSTANCE.controller().client();
+	}
+
+	public static int getAncIncReqId() {
+		return INSTANCE.controller().getAncIncReqId();
+	}
 
 	private void run() {
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);

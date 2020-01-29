@@ -4,15 +4,13 @@ import lombok.Data;
 
 @Data
 public class AccountSummaryRequest {
-    private int reqId;
     private String group;
     private String tags;
 
     public AccountSummaryRequest() {
     }
 
-    public AccountSummaryRequest(int reqId, String group, String tags) {
-        this.reqId = reqId;
+    public AccountSummaryRequest(String group, String tags) {
         this.group = group;
         this.tags = tags;
     }

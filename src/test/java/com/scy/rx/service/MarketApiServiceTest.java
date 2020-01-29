@@ -20,7 +20,7 @@ import java.util.Calendar;
 public class MarketApiServiceTest {
     private MarketApi marketApi = new MarketApiImpl();
 
-    private TraderApi traderApi = new TradeApiImpl();
+    private TradeApi tradeApi = new TradeApiImpl();
 
     @Test
     public void test() throws Exception {
@@ -46,7 +46,7 @@ public class MarketApiServiceTest {
     @Test
     public void test_reqMktData() throws Exception {
         marketApi.reqMarketDataType(MarketDataType.DELAYED);
-        int reqId = traderApi.reqId();
+        int reqId = tradeApi.reqId();
         marketApi.reqMktData(new MktDataRequest(reqId, ContractSamples.USStock(), "", false, null))
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(tickResponse -> {

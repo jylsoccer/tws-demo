@@ -1,7 +1,7 @@
 package com.scy.rx.service.impl;
 
 
-import com.scy.rx.client.EConnClient;
+import com.scy.apidemo.ApiDemo;
 import com.scy.rx.model.AccountSummaryRequest;
 import com.scy.rx.model.AccountSummaryResponse;
 import com.scy.rx.model.PositionsMultiRequest;
@@ -25,8 +25,6 @@ public class AccountApiImpl implements AccountApi {
 
     private FutureMap futureMap = FutureMap.INSTANCE;
 
-    private EConnClient eConnClient = EConnClient.INSTANCE;
-
     @Override
     public CompletableFuture<List<String>> reqManagedAccts() {
         if (FutureMap.tryLock()) {
@@ -36,7 +34,7 @@ public class AccountApiImpl implements AccountApi {
                 }
                 CompletableFuture<List<String>> future = new CompletableFuture<>();
                 futureMap.put(KEY_MANAGED_ACCOUNTS, future);
-                eConnClient.getClientSocket().reqManagedAccts();
+                ApiDemo.getClient().reqManagedAccts();
                 return future;
             } catch (Exception e) {
                 log.error("TradeApiImpl.reqId failed.", e);
@@ -56,7 +54,7 @@ public class AccountApiImpl implements AccountApi {
                 }
                 return Flowable.<PositionsMultiResponse>create(emitter -> {
                             flowableEmitterMap.put(request.getRequestId(), emitter);
-                            eConnClient.getClientSocket().reqPositionsMulti(request.getRequestId(), request.getAccount(), request.getModelCode());
+                            ApiDemo.getClient().reqPositionsMulti(request.getRequestId(), request.getAccount(), request.getModelCode());
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
@@ -70,12 +68,10 @@ public class AccountApiImpl implements AccountApi {
     public Flowable<AccountSummaryResponse> reqAccountSummary(AccountSummaryRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                if (flowableEmitterMap.get(request.getReqId()) != null) {
-                    throw new RuntimeException("reqAccountSummary is not available.");
-                }
+                int reqId = ApiDemo.getAncIncReqId();
                 return Flowable.<AccountSummaryResponse>create(emitter -> {
-                            flowableEmitterMap.put(request.getReqId(), emitter);
-                            eConnClient.getClientSocket().reqAccountSummary(request.getReqId(), request.getGroup(), request.getTags());
+                            flowableEmitterMap.put(reqId, emitter);
+                            ApiDemo.getClient().reqAccountSummary(reqId, request.getGroup(), request.getTags());
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
@@ -86,6 +82,6 @@ public class AccountApiImpl implements AccountApi {
 
     @Override
     public void cancelAccountSummary(int reqId) {
-        eConnClient.getClientSocket().cancelAccountSummary(reqId);
+        ApiDemo.getClient().cancelAccountSummary(reqId);
     }
 }

@@ -3,6 +3,8 @@
 
 package com.scy.apidemo;
 
+import com.alibaba.fastjson.JSON;
+import com.google.common.base.Joiner;
 import com.scy.apidemo.AccountInfoPanel.Table;
 import com.scy.apidemo.util.NewTabbedPanel.NewTabPanel;
 import com.ib.controller.AccountSummaryTag;
@@ -10,6 +12,15 @@ import com.ib.controller.ApiController.IAccountSummaryHandler;
 import com.ib.controller.Formats;
 import com.scy.apidemo.util.HtmlButton;
 import com.scy.apidemo.util.VerticalPanel;
+import com.scy.rx.model.AccountSummaryRequest;
+import com.scy.rx.model.AccountSummaryResponse;
+import com.scy.rx.service.AccountApi;
+import com.scy.rx.service.TradeApi;
+import com.scy.rx.service.impl.AccountApiImpl;
+import com.scy.rx.service.impl.TradeApiImpl;
+import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -17,10 +28,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
+@Slf4j
 public class AccountSummaryPanel extends NewTabPanel {
 	private SummaryModel m_model = new SummaryModel();
-	
+
+	private AccountApi accountApi = new AccountApiImpl();
+	private TradeApi tradeApi = new TradeApiImpl();
+
+
 	AccountSummaryPanel() {
 		HtmlButton sub = new HtmlButton( "Subscribe") {
 			protected void actionPerformed() {
@@ -57,7 +72,19 @@ public class AccountSummaryPanel extends NewTabPanel {
 	}
 	
 	private void subscribe() {
-		ApiDemo.INSTANCE.controller().reqAccountSummary( "All", AccountSummaryTag.values(), m_model);
+		Flowable<AccountSummaryResponse> flowable = accountApi.reqAccountSummary(new AccountSummaryRequest("All", Joiner.on(",").skipNulls().join(AccountSummaryTag.values())));
+		flowable.subscribeOn(Schedulers.newThread())
+				.subscribe(response -> {
+							log.info("position:{}", JSON.toJSONString(response));
+							m_model.accountSummary(response.getAccount(), AccountSummaryTag.valueOf(response.getTag()), response.getValue(), response.getCurrency());
+						},
+						error -> {
+							log.error("reqMktData error.", error);
+						},
+						() -> {
+							log.info("position end");
+							m_model.accountSummaryEnd();
+						});
 	}
 
 	private void desubscribe() {

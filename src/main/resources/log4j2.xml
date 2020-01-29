@@ -23,11 +23,11 @@
 
     <loggers>
 
-        <Logger name="com.scy.rx" level="info" additivity="false">
+        <Logger name="com.scy.rx" level="debug" additivity="false">
             <AppenderRef ref="RollingFile" />
             <AppenderRef ref="Console" />
         </Logger>
-        <root level="info">
+        <root level="debug">
             <appender-ref ref="Console"/>
         </root>
     </loggers>

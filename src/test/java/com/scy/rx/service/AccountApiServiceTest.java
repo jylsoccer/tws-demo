@@ -57,7 +57,7 @@ public class AccountApiServiceTest {
 
     @Test
     public void test_reqAccountSummary() throws Exception {
-        Flowable<AccountSummaryResponse> flowable = accountApi.reqAccountSummary(new AccountSummaryRequest(9001, "All", "AccountType,NetLiquidation,TotalCashValue"));
+        Flowable<AccountSummaryResponse> flowable = accountApi.reqAccountSummary(new AccountSummaryRequest( "All", "AccountType,NetLiquidation,TotalCashValue"));
         flowable.subscribeOn(Schedulers.newThread())
                 .subscribe(response -> {
                             log.info("account summary:{}", JSON.toJSONString(response));

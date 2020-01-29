@@ -18,22 +18,22 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class TradeApiServiceTest {
-    private TraderApi traderApi = new TradeApiImpl();
+    private TradeApi tradeApi = new TradeApiImpl();
 
     @Test
     public void test_reqId() throws Exception {
         log.info("test begin");
 
-        log.info("1:reqId:{}", traderApi.reqId());
-        log.info("2:reqId:{}", traderApi.reqId());
-        log.info("3:reqId:{}", traderApi.reqId());
+        log.info("1:reqId:{}", tradeApi.reqId());
+        log.info("2:reqId:{}", tradeApi.reqId());
+        log.info("3:reqId:{}", tradeApi.reqId());
 
         Thread.sleep(10000);
     }
 
     @Test
     public void test_placeOrder() throws Exception {
-        CompletableFuture<OrderStatusResponse> future = traderApi.placeOrder(new PlaceOrderRequest(traderApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
+        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
         future.thenAccept(
                 response -> log.info("OpenOrderResponse:{}", response)
         );
@@ -43,18 +43,18 @@ public class TradeApiServiceTest {
     @Test
     public void test_cancelOrder() throws Exception {
         // 下单
-        CompletableFuture<OrderStatusResponse> future = traderApi.placeOrder(new PlaceOrderRequest(traderApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 4, 50)));
+        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 4, 50)));
         future.thenAccept(
                 placeOrderResp -> {
                     log.info("placeOrderResp:{}", placeOrderResp);
                     // 查询所有未成交订单
-                    traderApi.reqAllOpenOrders()
+                    tradeApi.reqAllOpenOrders()
                             .subscribeOn(Schedulers.newThread())
                             .subscribe(
                                     openOrder -> {
                                         log.info("openOrder:{}", openOrder);
                                         // 撤销订单
-                                        traderApi.cancelOrder(openOrder.getOrderId())
+                                        tradeApi.cancelOrder(openOrder.getOrderId())
                                                 .thenAccept(orderResponse -> {
                                                     log.info("cancelOrder:{}", JSON.toJSONString(orderResponse));
                                                 });
@@ -68,7 +68,7 @@ public class TradeApiServiceTest {
 
     @Test
     public void test_reqAllOpenOrders() throws Exception {
-        traderApi.reqAllOpenOrders()
+        tradeApi.reqAllOpenOrders()
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
                 response -> log.info("OpenOrderResponse:{}", response)
@@ -78,7 +78,7 @@ public class TradeApiServiceTest {
 
     @Test
     public void test_reqExecutions() throws Exception {
-        traderApi.reqExecutions(new ExecDetailsRequest(traderApi.reqId(), new ExecutionFilter()))
+        tradeApi.reqExecutions(new ExecDetailsRequest(tradeApi.reqId(), new ExecutionFilter()))
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
                         response -> log.info("reqExecutionsResp:{}", response)

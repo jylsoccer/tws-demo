@@ -1,8 +1,8 @@
 package com.scy.rx.service.impl;
 
-import com.scy.rx.client.EConnClient;
+import com.scy.apidemo.ApiDemo;
 import com.scy.rx.model.*;
-import com.scy.rx.service.TraderApi;
+import com.scy.rx.service.TradeApi;
 import com.scy.rx.wrapper.FlowableEmitterMap;
 import com.scy.rx.wrapper.FutureMap;
 import io.reactivex.BackpressureStrategy;
@@ -16,13 +16,11 @@ import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
 @Slf4j
-public class TradeApiImpl implements TraderApi {
+public class TradeApiImpl implements TradeApi {
 
     private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
 
     private FutureMap futureMap = FutureMap.INSTANCE;
-
-    private EConnClient eConnClient = EConnClient.INSTANCE;
 
     @Override
     public Integer reqId() {
@@ -30,7 +28,7 @@ public class TradeApiImpl implements TraderApi {
             try {
                 CompletableFuture<Integer> future = new CompletableFuture<>();
                 futureMap.put(KEY_REQID, future);
-                eConnClient.getClientSocket().reqIds(KEY_REQID);
+                ApiDemo.getClient().reqIds(KEY_REQID);
                 return future.get(1, TimeUnit.SECONDS);
             } catch (Exception e) {
                 log.error("TradeApiImpl.reqId failed.", e);
@@ -52,7 +50,7 @@ public class TradeApiImpl implements TraderApi {
                 }
                 CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
                 futureMap.put(placeOrderRequest.getReqId(), future);
-                eConnClient.getClientSocket().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
+                ApiDemo.getClient().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
                 return future;
             } finally {
                 FutureMap.unlock();
@@ -71,7 +69,7 @@ public class TradeApiImpl implements TraderApi {
                 CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
                 futureMap.put(orderId, future);
                 log.info("cancelOrder, orderId:{}", orderId);
-                eConnClient.getClientSocket().cancelOrder(orderId);
+                ApiDemo.getClient().cancelOrder(orderId);
                 return future;
             } finally {
                 FutureMap.unlock();
@@ -90,7 +88,7 @@ public class TradeApiImpl implements TraderApi {
                 return Flowable.<ExecDetailsResponse>create(
                         emitter -> {
                             flowableEmitterMap.put(request.getReqId(), emitter);
-                            eConnClient.getClientSocket().reqExecutions(request.getReqId(), request.getFilter());
+                            ApiDemo.getClient().reqExecutions(request.getReqId(), request.getFilter());
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
@@ -110,7 +108,7 @@ public class TradeApiImpl implements TraderApi {
                 return Flowable.<OpenOrderResponse>create(
                         emitter -> {
                             flowableEmitterMap.put(KEY_REQ_ALL_OPEN_ORDERS, emitter);
-                            eConnClient.getClientSocket().reqAllOpenOrders();
+                            ApiDemo.getClient().reqAllOpenOrders();
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {

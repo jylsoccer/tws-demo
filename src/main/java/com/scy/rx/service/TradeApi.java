@@ -5,7 +5,7 @@ import io.reactivex.Flowable;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface TraderApi {
+public interface TradeApi {
 
 	/**
 	 * 查当前有效的reqId

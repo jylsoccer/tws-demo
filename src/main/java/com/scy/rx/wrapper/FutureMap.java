@@ -40,7 +40,7 @@ public class FutureMap {
         private static final long serialVersionUID = 1L;
         @Override
         protected boolean removeEldestEntry(Map.Entry<Integer, CompletableFuture> eldest) {
-            return size() > 100;
+            return size() > 500;
         }
     };
 

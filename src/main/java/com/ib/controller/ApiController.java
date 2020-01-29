@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.CompletableFuture;
 
 import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
@@ -41,7 +42,15 @@ import com.ib.client.Types.MktDataType;
 import com.ib.client.Types.NewsType;
 import com.ib.client.Types.WhatToShow;
 import com.ib.controller.ApiConnection.ILogger;
+import com.scy.rx.model.AccountSummaryResponse;
+import com.scy.rx.wrapper.FlowableEmitterMap;
+import com.scy.rx.wrapper.FutureMap;
+import io.reactivex.FlowableEmitter;
+import lombok.extern.slf4j.Slf4j;
 
+import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
+
+@Slf4j
 public class ApiController implements EWrapper {
 	private ApiConnection m_client;
 	private final ILogger m_outLogger;
@@ -75,6 +84,10 @@ public class ApiController implements EWrapper {
 	private final HashMap<Integer, ISecDefOptParamsReqHandler> m_secDefOptParamsReqMap = new HashMap<Integer, ISecDefOptParamsReqHandler>();
 	private final HashMap<Integer, ISoftDollarTiersReqHandler> m_softDollarTiersReqMap = new HashMap<>();
 	private boolean m_connected = false;
+
+
+	private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
+	private FutureMap futureMap = FutureMap.INSTANCE;
 
 	public ApiConnection client() { return m_client; }
 
@@ -141,12 +154,18 @@ public class ApiController implements EWrapper {
 		recEOM();
 	}
 
-	@Override public void nextValidId(int orderId) {
+	@Override
+	public void nextValidId(int orderId) {
+		log.debug("Next Valid Id: [{}]", orderId);
 		m_orderId = orderId;
-		m_reqId = m_orderId + 10000000; // let order id's not collide with other request id's
+		m_reqId = m_orderId + 10000000;
 		m_connected  = true;
 		if (m_connectionHandler != null) {
 			m_connectionHandler.connected();
+		}
+		CompletableFuture<Integer> future = futureMap.get(KEY_REQID);
+		if (future != null) {
+			future.complete(orderId);
 		}
 		recEOM();
 	}
@@ -301,35 +320,29 @@ public class ApiController implements EWrapper {
 		}
 	}
 
-	@Override public void accountSummary( int reqId, String account, String tag, String value, String currency) {
-		if (tag.equals( "Currency") ) { // ignore this, it is useless
+	@Override
+	public void accountSummary(int reqId, String account, String tag,
+							   String value, String currency) {
+		log.debug("Acct Summary. ReqId: " + reqId + ", Acct: " + account + ", Tag: " + tag + ", Value: " + value + ", Currency: " + currency);
+		AccountSummaryResponse response = new AccountSummaryResponse(reqId, account, tag, value, currency);
+		FlowableEmitter<AccountSummaryResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onNext(response);
 			return;
 		}
-
-		IAccountSummaryHandler handler = m_acctSummaryHandlers.get( reqId);
-		if (handler != null) {
-			handler.accountSummary(account, AccountSummaryTag.valueOf( tag), value, currency);
-		}
-
-		IMarketValueSummaryHandler handler2 = m_mktValSummaryHandlers.get( reqId);
-		if (handler2 != null) {
-			handler2.marketValueSummary(account, MarketValueTag.valueOf( tag), value, currency);
-		}
-
+		log.warn("accountSummary, emitter not registered. reqId:{}", reqId);
 		recEOM();
 	}
 
-	@Override public void accountSummaryEnd( int reqId) {
-		IAccountSummaryHandler handler = m_acctSummaryHandlers.get( reqId);
-		if (handler != null) {
-			handler.accountSummaryEnd();
+	@Override
+	public void accountSummaryEnd(int reqId) {
+		log.debug("AccountSummaryEnd. Req Id: "+reqId+"\n");
+		FlowableEmitter<AccountSummaryResponse> emitter = flowableEmitterMap.get(reqId);
+		if (emitter != null) {
+			emitter.onComplete();
+//			flowableEmitterMap.remove(reqId);
+//			log.info("accountSummaryEnd, reqId:{} removed.", reqId);
 		}
-
-		IMarketValueSummaryHandler handler2 = m_mktValSummaryHandlers.get( reqId);
-		if (handler2 != null) {
-			handler2.marketValueSummaryEnd();
-		}
-
 		recEOM();
 	}
 
@@ -1337,5 +1350,9 @@ public class ApiController implements EWrapper {
 		if (handler != null) {
 			handler.softDollarTiers(tiers);
 		}
+	}
+
+	public int getAncIncReqId() {
+		return m_reqId++;
 	}
 }

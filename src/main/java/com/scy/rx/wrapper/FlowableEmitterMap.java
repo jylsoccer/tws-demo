@@ -39,7 +39,7 @@ public class FlowableEmitterMap {
         private static final long serialVersionUID = 1L;
         @Override
         protected boolean removeEldestEntry(Map.Entry<Integer, FlowableEmitter> eldest) {
-            return size() > 100;
+            return size() > 500;
         }
     };
 
