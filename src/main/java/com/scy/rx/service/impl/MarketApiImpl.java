@@ -19,12 +19,10 @@ public class MarketApiImpl implements MarketApi {
     public Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                if (flowableEmitterMap.get(request.getTickerId()) != null) {
-                    throw new RuntimeException("historicalDataRequests is not available.");
-                }
+                int reqId = ApiDemo.getAncIncReqId();
                 return Flowable.<HistoricalDataResponse>create(emitter -> {
-                            flowableEmitterMap.put(request.getTickerId(), emitter);
-                            ApiDemo.getClient().reqHistoricalData(request.getTickerId(), request.getContract(), request.getEndDateTime(),
+                            flowableEmitterMap.put(reqId, emitter);
+                            ApiDemo.getClient().reqHistoricalData(reqId, request.getContract(), request.getEndDateTime(),
                                     request.getDurationString(), request.getBarSizeSetting(),
                                     request.getWhatToShow(), request.getUseRTH(), request.getFormatDate(), request.getChartOptions());
                         },
@@ -40,12 +38,10 @@ public class MarketApiImpl implements MarketApi {
     public Flowable<TickResponse> reqMktData(MktDataRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                if (flowableEmitterMap.get(request.getTickerId()) != null) {
-                    throw new RuntimeException("reqMktData is not available.");
-                }
+                int reqId = ApiDemo.getAncIncReqId();
                 return Flowable.<TickResponse>create(emitter -> {
-                            flowableEmitterMap.put(request.getTickerId(), emitter);
-                            ApiDemo.getClient().reqMktData(request.getTickerId(), request.getContract(), request.getGenericTickList(),
+                            flowableEmitterMap.put(reqId, emitter);
+                            ApiDemo.getClient().reqMktData(reqId, request.getContract(), request.getGenericTickList(),
                                     request.isSnapshot(), request.getMktDataOptions());
                         },
                         BackpressureStrategy.BUFFER).cache();

@@ -49,12 +49,10 @@ public class AccountApiImpl implements AccountApi {
     public Flowable<PositionsMultiResponse> reqPositionsMulti(PositionsMultiRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                if (flowableEmitterMap.get(request.getRequestId()) != null) {
-                    throw new RuntimeException("reqPositionsMulti is not available.");
-                }
+                int reqId = ApiDemo.getAncIncReqId();
                 return Flowable.<PositionsMultiResponse>create(emitter -> {
-                            flowableEmitterMap.put(request.getRequestId(), emitter);
-                            ApiDemo.getClient().reqPositionsMulti(request.getRequestId(), request.getAccount(), request.getModelCode());
+                            flowableEmitterMap.put(reqId, emitter);
+                            ApiDemo.getClient().reqPositionsMulti(reqId, request.getAccount(), request.getModelCode());
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {

@@ -20,8 +20,6 @@ import java.util.Calendar;
 public class MarketApiServiceTest {
     private MarketApi marketApi = new MarketApiImpl();
 
-    private TradeApi tradeApi = new TradeApiImpl();
-
     @Test
     public void test() throws Exception {
         log.info("test begin");
@@ -40,14 +38,13 @@ public class MarketApiServiceTest {
         cal.add(Calendar.MONTH, -6);
         SimpleDateFormat form = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
         String formatted = form.format(cal.getTime());
-        return new HistoricalDataRequest(4001, ContractSamples.EurGbpFx(), formatted, "1 M", "1 day", "MIDPOINT", 1, 1, null);
+        return new HistoricalDataRequest(ContractSamples.EurGbpFx(), formatted, "1 M", "1 day", "MIDPOINT", 1, 1, null);
     }
 
     @Test
     public void test_reqMktData() throws Exception {
         marketApi.reqMarketDataType(MarketDataType.DELAYED);
-        int reqId = tradeApi.reqId();
-        marketApi.reqMktData(new MktDataRequest(reqId, ContractSamples.USStock(), "", false, null))
+        marketApi.reqMktData(new MktDataRequest(ContractSamples.USStock(), "", false, null))
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(tickResponse -> {
                             log.info("tickResponse:{}", JSON.toJSONString(tickResponse));

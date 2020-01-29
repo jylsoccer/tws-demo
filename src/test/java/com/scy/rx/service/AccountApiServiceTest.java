@@ -24,7 +24,7 @@ public class AccountApiServiceTest {
     public void test_reqManagedAccts() throws Exception {
         CompletableFuture<List<String>> future = accountApi.reqManagedAccts();
         future.thenAccept(list -> {
-            Flowable<PositionsMultiResponse> flowable = accountApi.reqPositionsMulti(new PositionsMultiRequest(9003, list.get(0), ""));
+            Flowable<PositionsMultiResponse> flowable = accountApi.reqPositionsMulti(new PositionsMultiRequest(list.get(0), ""));
             flowable.subscribeOn(Schedulers.newThread())
                     .subscribe(response -> {
                                 log.info("position:{}", JSON.toJSONString(response));
@@ -41,7 +41,7 @@ public class AccountApiServiceTest {
 
     @Test
     public void test_reqPositionsMulti() throws Exception {
-        Flowable<PositionsMultiResponse> flowable = accountApi.reqPositionsMulti(new PositionsMultiRequest(9003, "DU1812147", ""));
+        Flowable<PositionsMultiResponse> flowable = accountApi.reqPositionsMulti(new PositionsMultiRequest("DU1812147", ""));
         flowable.subscribeOn(Schedulers.newThread())
                 .subscribe(response -> {
                             log.info("position:{}", JSON.toJSONString(response));
