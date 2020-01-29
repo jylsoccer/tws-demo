@@ -10,6 +10,7 @@ import java.util.Date;
 
 public class Formats {
 	private static final Format FMT2 = new DecimalFormat( "#,##0.00");
+	private static final Format FMT4 = new DecimalFormat( "#,##0.0000");
 	private static final Format FMT0 = new DecimalFormat( "#,##0");
 	private static final Format PCT = new DecimalFormat( "0.0%");
 	private static final SimpleDateFormat DATE_TIME = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss"); // format for display
@@ -28,6 +29,11 @@ public class Formats {
 	/** Format with no decimals. */
 	public static String fmt0( double v) {
 		return v == Double.MAX_VALUE ? null : FMT0.format( v);
+	}
+
+	/** Format with no decimals. */
+	public static String fmt4( double v) {
+		return v == Double.MAX_VALUE ? null : FMT4.format( v);
 	}
 
 	/** Format as percent with one decimal. */

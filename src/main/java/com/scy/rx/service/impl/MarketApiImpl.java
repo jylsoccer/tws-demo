@@ -14,15 +14,16 @@ public class MarketApiImpl implements MarketApi {
 
     private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
 
-
     @Override
     public Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                int reqId = ApiDemo.getAncIncReqId();
+                if (flowableEmitterMap.get(request.getTickerId()) != null) {
+                    throw new RuntimeException("historicalDataRequests is not available.");
+                }
                 return Flowable.<HistoricalDataResponse>create(emitter -> {
-                            flowableEmitterMap.put(reqId, emitter);
-                            ApiDemo.getClient().reqHistoricalData(reqId, request.getContract(), request.getEndDateTime(),
+                            flowableEmitterMap.put(request.getTickerId(), emitter);
+                            ApiDemo.getClient().reqHistoricalData(request.getTickerId(), request.getContract(), request.getEndDateTime(),
                                     request.getDurationString(), request.getBarSizeSetting(),
                                     request.getWhatToShow(), request.getUseRTH(), request.getFormatDate(), request.getChartOptions());
                         },
@@ -38,10 +39,12 @@ public class MarketApiImpl implements MarketApi {
     public Flowable<TickResponse> reqMktData(MktDataRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                int reqId = ApiDemo.getAncIncReqId();
+                if (flowableEmitterMap.get(request.getTickerId()) != null) {
+                    throw new RuntimeException("reqMktData is not available.");
+                }
                 return Flowable.<TickResponse>create(emitter -> {
-                            flowableEmitterMap.put(reqId, emitter);
-                            ApiDemo.getClient().reqMktData(reqId, request.getContract(), request.getGenericTickList(),
+                            flowableEmitterMap.put(request.getTickerId(), emitter);
+                            ApiDemo.getClient().reqMktData(request.getTickerId(), request.getContract(), request.getGenericTickList(),
                                     request.isSnapshot(), request.getMktDataOptions());
                         },
                         BackpressureStrategy.BUFFER).cache();

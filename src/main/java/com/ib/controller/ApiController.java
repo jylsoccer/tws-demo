@@ -3,50 +3,28 @@
 
 package com.ib.controller;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.concurrent.CompletableFuture;
-
-import com.ib.client.CommissionReport;
-import com.ib.client.Contract;
-import com.ib.client.ContractDetails;
-import com.ib.client.DeltaNeutralContract;
-import com.ib.client.EClientErrors;
-import com.ib.client.EJavaSignal;
-import com.ib.client.EReader;
-import com.ib.client.EReaderSignal;
-import com.ib.client.EWrapper;
-import com.ib.client.Execution;
-import com.ib.client.ExecutionFilter;
-import com.ib.client.Order;
-import com.ib.client.OrderState;
-import com.ib.client.OrderStatus;
-import com.ib.client.ScannerSubscription;
-import com.ib.client.SoftDollarTier;
-import com.ib.client.TagValue;
-import com.ib.client.TickType;
-import com.ib.client.Types.BarSize;
-import com.ib.client.Types.DeepSide;
-import com.ib.client.Types.DeepType;
-import com.ib.client.Types.DurationUnit;
-import com.ib.client.Types.ExerciseType;
-import com.ib.client.Types.FADataType;
-import com.ib.client.Types.FundamentalType;
-import com.ib.client.Types.MktDataType;
-import com.ib.client.Types.NewsType;
-import com.ib.client.Types.WhatToShow;
+import com.alibaba.fastjson.JSON;
+import com.google.common.base.Joiner;
+import com.ib.client.*;
+import com.ib.client.Types.*;
 import com.ib.controller.ApiConnection.ILogger;
-import com.scy.rx.model.AccountSummaryResponse;
+import com.scy.rx.model.*;
+import com.scy.rx.service.AccountApi;
+import com.scy.rx.service.MarketApi;
+import com.scy.rx.service.TradeApi;
+import com.scy.rx.service.impl.AccountApiImpl;
+import com.scy.rx.service.impl.MarketApiImpl;
+import com.scy.rx.service.impl.TradeApiImpl;
 import com.scy.rx.wrapper.FlowableEmitterMap;
 import com.scy.rx.wrapper.FutureMap;
 import io.reactivex.FlowableEmitter;
+import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
@@ -57,6 +35,10 @@ public class ApiController implements EWrapper {
 	private final ILogger m_inLogger;
 	private int m_reqId;	// used for all requests except orders; designed not to conflict with m_orderId
 	private int m_orderId;
+
+	private MarketApi marketApi = new MarketApiImpl();
+	private AccountApi accountApi = new AccountApiImpl();
+	private TradeApi tradeApi = new TradeApiImpl();
 
 	private final IConnectionHandler m_connectionHandler;
 	private ITradeReportHandler m_tradeReportHandler;
@@ -269,18 +251,21 @@ public class ApiController implements EWrapper {
 	public void reqAccountSummary(String group, AccountSummaryTag[] tags, IAccountSummaryHandler handler) {
 		if (!checkConnection())
 			return;
-		
-		StringBuilder sb = new StringBuilder();
-		for (AccountSummaryTag tag : tags) {
-			if (sb.length() > 0) {
-				sb.append( ',');
-			}
-			sb.append( tag);
-		}
 
 		int reqId = m_reqId++;
-		m_acctSummaryHandlers.put( reqId, handler);
-		m_client.reqAccountSummary( reqId, group, sb.toString() );
+		accountApi.reqAccountSummary(new AccountSummaryRequest(reqId, group, Joiner.on(",").skipNulls().join(tags)))
+				.subscribeOn(Schedulers.newThread())
+				.subscribe(response -> {
+							log.debug("position:{}", JSON.toJSONString(response));
+							handler.accountSummary(response.getAccount(), AccountSummaryTag.valueOf(response.getTag()), response.getValue(), response.getCurrency());
+						},
+						error -> {
+							log.error("reqMktData error.", error);
+						},
+						() -> {
+							log.debug("position end");
+							handler.accountSummaryEnd();
+						});
 		sendEOM();
 	}
 
@@ -341,7 +326,7 @@ public class ApiController implements EWrapper {
 		if (emitter != null) {
 			emitter.onComplete();
 //			flowableEmitterMap.remove(reqId);
-//			log.info("accountSummaryEnd, reqId:{} removed.", reqId);
+//			log.debug("accountSummaryEnd, reqId:{} removed.", reqId);
 		}
 		recEOM();
 	}
@@ -501,8 +486,22 @@ public class ApiController implements EWrapper {
 			return;
 
     	int reqId = m_reqId++;
-    	m_topMktDataMap.put( reqId, handler);
-    	m_client.reqMktData( reqId, contract, genericTickList, snapshot, Collections.<TagValue>emptyList() );
+    	marketApi.reqMktData(new MktDataRequest(reqId, contract, genericTickList, snapshot, Collections.<TagValue>emptyList()))
+				.subscribeOn(Schedulers.newThread())
+				.subscribe(
+						tickResponse -> {
+							if (tickResponse instanceof TickPriceResponse) {
+								TickPriceResponse tickPriceResponse = (TickPriceResponse) tickResponse;
+								handler.tickPrice( TickType.get(tickPriceResponse.getField()), tickPriceResponse.getPrice(), tickPriceResponse.getCanAutoExecute());
+							} else if (tickResponse instanceof TickSizeResponse) {
+								TickSizeResponse tickSizeResponse = (TickSizeResponse) tickResponse;
+								handler.tickSize( TickType.get(tickSizeResponse.getField()), tickSizeResponse.getSize());
+							}
+						},
+						error -> {
+							log.error("marketApi.reqMktData error.", error);
+						}
+				);
 		sendEOM();
     }
 
@@ -560,14 +559,6 @@ public class ApiController implements EWrapper {
 		sendEOM();
 	}
 
-	@Override public void tickPrice(int reqId, int tickType, double price, int canAutoExecute) {
-		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
-		if (handler != null) {
-			handler.tickPrice( TickType.get( tickType), price, canAutoExecute);
-		}
-		recEOM();
-	}
-
 	@Override public void tickGeneric(int reqId, int tickType, double value) {
 		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
 		if (handler != null) {
@@ -576,11 +567,31 @@ public class ApiController implements EWrapper {
 		recEOM();
 	}
 
-	@Override public void tickSize(int reqId, int tickType, int size) {
-		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
-		if (handler != null) {
-			handler.tickSize( TickType.get( tickType), size);
+	@Override
+	public void tickPrice(int tickerId, int field, double price, int canAutoExecute) {
+		log.debug("Tick Price. Ticker Id:"+tickerId+", Field: "+field+", Price: "+price+", CanAutoExecute: "+canAutoExecute);
+		TickPriceResponse response = new TickPriceResponse(tickerId, field, price, canAutoExecute);
+		FlowableEmitter<TickPriceResponse> emitter = flowableEmitterMap.get(tickerId);
+		if (emitter != null) {
+			emitter.onNext(response);
+			recEOM();
+			return;
 		}
+		log.warn("tickPrice, emitter not registered. tickerId:{}", tickerId);
+		recEOM();
+	}
+
+	@Override
+	public void tickSize(int tickerId, int field, int size) {
+		log.debug("Tick Size. Ticker Id:" + tickerId + ", Field: " + field + ", Size: " + size);
+		TickSizeResponse response = new TickSizeResponse(tickerId, field, size);
+		FlowableEmitter<TickSizeResponse> emitter = flowableEmitterMap.get(tickerId);
+		if (emitter != null) {
+			emitter.onNext(response);
+			recEOM();
+			return;
+		}
+		log.warn("tickSize, emitter not registered. tickerId:{}", tickerId);
 		recEOM();
 	}
 
@@ -1352,7 +1363,4 @@ public class ApiController implements EWrapper {
 		}
 	}
 
-	public int getAncIncReqId() {
-		return m_reqId++;
-	}
 }

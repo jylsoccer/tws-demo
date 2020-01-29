@@ -76,10 +76,6 @@ public class ApiDemo implements IConnectionHandler {
 		return INSTANCE.controller().client();
 	}
 
-	public static int getAncIncReqId() {
-		return INSTANCE.controller().getAncIncReqId();
-	}
-
 	private void run() {
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
 		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);

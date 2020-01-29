@@ -45,10 +45,12 @@ public class TradeApiImpl implements TradeApi {
     public CompletableFuture<OrderStatusResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
         if (FutureMap.tryLock()) {
             try {
-                int reqId = ApiDemo.getAncIncReqId();
+                if (futureMap.get(placeOrderRequest.getReqId()) != null) {
+                    throw new RuntimeException("placeOrder is not available.");
+                }
                 CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
-                futureMap.put(reqId, future);
-                ApiDemo.getClient().placeOrder(reqId, placeOrderRequest.getContract(), placeOrderRequest.getOrder());
+                futureMap.put(placeOrderRequest.getReqId(), future);
+                ApiDemo.getClient().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
                 return future;
             } finally {
                 FutureMap.unlock();
@@ -61,6 +63,9 @@ public class TradeApiImpl implements TradeApi {
     public CompletableFuture<OrderStatusResponse> cancelOrder(int orderId) {
         if (FutureMap.tryLock()) {
             try {
+                if (futureMap.get(orderId) != null) {
+                    throw new RuntimeException("cancelOrder is not available.");
+                }
                 CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
                 futureMap.put(orderId, future);
                 log.info("cancelOrder, orderId:{}", orderId);
@@ -77,11 +82,13 @@ public class TradeApiImpl implements TradeApi {
     public Flowable<ExecDetailsResponse> reqExecutions(ExecDetailsRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                int reqId = ApiDemo.getAncIncReqId();
+                if (flowableEmitterMap.get(request.getReqId()) != null) {
+                    throw new RuntimeException("reqExecutions is not available.");
+                }
                 return Flowable.<ExecDetailsResponse>create(
                         emitter -> {
-                            flowableEmitterMap.put(reqId, emitter);
-                            ApiDemo.getClient().reqExecutions(reqId, request.getFilter());
+                            flowableEmitterMap.put(request.getReqId(), emitter);
+                            ApiDemo.getClient().reqExecutions(request.getReqId(), request.getFilter());
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {

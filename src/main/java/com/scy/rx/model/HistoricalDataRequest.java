@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class HistoricalDataRequest {
+    private int tickerId;
     private Contract contract;
     private String endDateTime;
     private String durationString;
@@ -20,7 +21,8 @@ public class HistoricalDataRequest {
     public HistoricalDataRequest() {
     }
 
-    public HistoricalDataRequest(Contract contract, String endDateTime, String durationString, String barSizeSetting, String whatToShow, int useRTH, int formatDate, List<TagValue> chartOptions) {
+    public HistoricalDataRequest(int tickerId, Contract contract, String endDateTime, String durationString, String barSizeSetting, String whatToShow, int useRTH, int formatDate, List<TagValue> chartOptions) {
+        this.tickerId = tickerId;
         this.contract = contract;
         this.endDateTime = endDateTime;
         this.durationString = durationString;

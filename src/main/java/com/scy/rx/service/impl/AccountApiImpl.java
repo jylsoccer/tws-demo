@@ -49,10 +49,12 @@ public class AccountApiImpl implements AccountApi {
     public Flowable<PositionsMultiResponse> reqPositionsMulti(PositionsMultiRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                int reqId = ApiDemo.getAncIncReqId();
+                if (flowableEmitterMap.get(request.getRequestId()) != null) {
+                    throw new RuntimeException("reqPositionsMulti is not available.");
+                }
                 return Flowable.<PositionsMultiResponse>create(emitter -> {
-                            flowableEmitterMap.put(reqId, emitter);
-                            ApiDemo.getClient().reqPositionsMulti(reqId, request.getAccount(), request.getModelCode());
+                            flowableEmitterMap.put(request.getRequestId(), emitter);
+                            ApiDemo.getClient().reqPositionsMulti(request.getRequestId(), request.getAccount(), request.getModelCode());
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {
@@ -66,10 +68,12 @@ public class AccountApiImpl implements AccountApi {
     public Flowable<AccountSummaryResponse> reqAccountSummary(AccountSummaryRequest request) {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                int reqId = ApiDemo.getAncIncReqId();
+                if (flowableEmitterMap.get(request.getReqId()) != null) {
+                    throw new RuntimeException("reqAccountSummary is not available.");
+                }
                 return Flowable.<AccountSummaryResponse>create(emitter -> {
-                            flowableEmitterMap.put(reqId, emitter);
-                            ApiDemo.getClient().reqAccountSummary(reqId, request.getGroup(), request.getTags());
+                            flowableEmitterMap.put(request.getReqId(), emitter);
+                            ApiDemo.getClient().reqAccountSummary(request.getReqId(), request.getGroup(), request.getTags());
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {

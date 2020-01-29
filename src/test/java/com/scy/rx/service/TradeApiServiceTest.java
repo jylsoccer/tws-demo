@@ -33,7 +33,7 @@ public class TradeApiServiceTest {
 
     @Test
     public void test_placeOrder() throws Exception {
-        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
+        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
         future.thenAccept(
                 response -> log.info("OpenOrderResponse:{}", response)
         );
@@ -43,7 +43,7 @@ public class TradeApiServiceTest {
     @Test
     public void test_cancelOrder() throws Exception {
         // 下单
-        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 4, 50)));
+        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 4, 50)));
         future.thenAccept(
                 placeOrderResp -> {
                     log.info("placeOrderResp:{}", placeOrderResp);
@@ -78,7 +78,7 @@ public class TradeApiServiceTest {
 
     @Test
     public void test_reqExecutions() throws Exception {
-        tradeApi.reqExecutions(new ExecDetailsRequest(new ExecutionFilter()))
+        tradeApi.reqExecutions(new ExecDetailsRequest(tradeApi.reqId(), new ExecutionFilter()))
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
                         response -> log.info("reqExecutionsResp:{}", response)

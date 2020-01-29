@@ -4,16 +4,21 @@
 package com.scy.apidemo;
 
 import com.ib.client.Contract;
+import com.ib.client.TagValue;
 import com.ib.client.TickType;
 import com.ib.client.Types.MktDataType;
 import com.ib.controller.ApiController.TopMktDataAdapter;
 import com.ib.controller.Formats;
+import com.scy.rx.model.MktDataRequest;
+import com.scy.rx.service.MarketApi;
+import com.scy.rx.service.impl.MarketApiImpl;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static com.ib.controller.Formats.*;
 
@@ -66,8 +71,8 @@ class TopModel extends AbstractTableModel {
 		switch( col) {
 			case 0: return row.m_description;
 			case 1: return row.m_bidSize;
-			case 2: return fmt( row.m_bid);
-			case 3: return fmt( row.m_ask);
+			case 2: return fmt4( row.m_bid);
+			case 3: return fmt4( row.m_ask);
 			case 4: return row.m_askSize;
 			case 5: return fmt( row.m_last);
 			case 6: return fmtTime( row.m_lastTime);

@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class MktDataRequest {
+    private int tickerId;
     private Contract contract;
     private String genericTickList;
     private boolean snapshot;
@@ -16,7 +17,8 @@ public class MktDataRequest {
     public MktDataRequest() {
     }
 
-    public MktDataRequest(Contract contract, String genericTickList, boolean snapshot, List<TagValue> mktDataOptions) {
+    public MktDataRequest(int tickerId, Contract contract, String genericTickList, boolean snapshot, List<TagValue> mktDataOptions) {
+        this.tickerId = tickerId;
         this.contract = contract;
         this.genericTickList = genericTickList;
         this.snapshot = snapshot;

@@ -5,12 +5,14 @@ import lombok.Data;
 
 @Data
 public class ExecDetailsRequest {
+    private int reqId;
     private ExecutionFilter filter;
 
     public ExecDetailsRequest() {
     }
 
-    public ExecDetailsRequest(ExecutionFilter filter) {
+    public ExecDetailsRequest(int reqId, ExecutionFilter filter) {
+        this.reqId = reqId;
         this.filter = filter;
     }
 }
