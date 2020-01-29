@@ -2,30 +2,23 @@ package com.scy.rx.service;
 
 
 import com.alibaba.fastjson.JSON;
-import com.scy.rx.TestDemo;
 import com.scy.rx.model.AccountSummaryRequest;
 import com.scy.rx.model.AccountSummaryResponse;
 import com.scy.rx.model.PositionsMultiRequest;
 import com.scy.rx.model.PositionsMultiResponse;
+import com.scy.rx.service.impl.AccountApiImpl;
 import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestDemo.class})
 @Slf4j
 public class AccountApiServiceTest {
-    @Autowired
-    private AccountApi accountApi;
+    private AccountApi accountApi = new AccountApiImpl();
 
     @Test
     public void test_reqManagedAccts() throws Exception {

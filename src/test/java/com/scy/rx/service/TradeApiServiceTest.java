@@ -3,29 +3,22 @@ package com.scy.rx.service;
 
 import com.alibaba.fastjson.JSON;
 import com.ib.client.ExecutionFilter;
-import com.scy.rx.TestDemo;
 import com.scy.rx.model.ExecDetailsRequest;
 import com.scy.rx.model.OrderStatusResponse;
 import com.scy.rx.model.PlaceOrderRequest;
+import com.scy.rx.service.impl.TradeApiImpl;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import samples.testbed.contracts.ContractSamples;
 import samples.testbed.orders.OrderSamples;
 
 import java.util.concurrent.CompletableFuture;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestDemo.class})
 @Slf4j
 public class TradeApiServiceTest {
-    @Autowired
-    private TraderApi traderApi;
+    private TraderApi traderApi = new TradeApiImpl();
 
     @Test
     public void test_reqId() throws Exception {

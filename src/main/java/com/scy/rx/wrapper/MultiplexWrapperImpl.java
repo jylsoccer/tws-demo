@@ -5,10 +5,7 @@ import com.ib.client.*;
 import com.scy.rx.model.*;
 import io.reactivex.FlowableEmitter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -18,18 +15,17 @@ import static com.scy.rx.wrapper.FutureMap.KEY_MANAGED_ACCOUNTS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
 @Slf4j
-@Service
 public class MultiplexWrapperImpl implements EWrapper {
+
+	public static MultiplexWrapperImpl INSTANCE = new MultiplexWrapperImpl();
 
 	private EReaderSignal readerSignal;
 	private EClientSocket clientSocket;
 	protected int currentOrderId = -1;
 
-	@Autowired
-	private FlowableEmitterMap flowableEmitterMap;
+	private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
 
-	@Autowired
-	private FutureMap futureMap;
+	private FutureMap futureMap = FutureMap.INSTANCE;
 
 	public MultiplexWrapperImpl() {
 		readerSignal = new EJavaSignal();

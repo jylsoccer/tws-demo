@@ -1,8 +1,6 @@
 package com.scy.rx.wrapper;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,9 +8,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Repository
 @Slf4j
 public class FutureMap {
+
+    public static FutureMap INSTANCE = new FutureMap();
 
     public static final Integer KEY_REQID = -1;
     public static final Integer KEY_MANAGED_ACCOUNTS = -2;

@@ -2,16 +2,17 @@ package com.scy.rx.wrapper;
 
 import io.reactivex.FlowableEmitter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Repository
 @Slf4j
 public class FlowableEmitterMap {
+
+    public static FlowableEmitterMap INSTANCE = new FlowableEmitterMap();
+
     public static final Integer KEY_REQ_ALL_OPEN_ORDERS = -1;
 
     private static final ReentrantLock lock = new ReentrantLock();

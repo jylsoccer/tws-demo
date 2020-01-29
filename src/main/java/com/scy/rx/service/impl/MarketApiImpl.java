@@ -9,17 +9,12 @@ import com.scy.rx.service.MarketApi;
 import com.scy.rx.wrapper.FlowableEmitterMap;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class MarketApiImpl implements MarketApi {
 
-    @Autowired
-    private FlowableEmitterMap flowableEmitterMap;
+    private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
 
-    @Autowired
-    private EConnClient eConnClient;
+    private EConnClient eConnClient = EConnClient.INSTANCE;
 
     @Override
     public Flowable<HistoricalDataResponse> historicalDataRequests(HistoricalDataRequest request) {

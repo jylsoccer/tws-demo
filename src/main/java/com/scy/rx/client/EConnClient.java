@@ -6,17 +6,19 @@ import com.ib.client.EReaderSignal;
 import com.scy.rx.thread.ThreadPools;
 import com.scy.rx.wrapper.MultiplexWrapperImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
-@Component
 public class EConnClient {
-    @Autowired
-    private MultiplexWrapperImpl wrapper;
+
+    public static EConnClient INSTANCE = new EConnClient();
+
+    public EConnClient() {
+        connect();
+    }
+
+    private MultiplexWrapperImpl wrapper = MultiplexWrapperImpl.INSTANCE;
 
     private EClientSocket clientSocket;
 
@@ -26,7 +28,6 @@ public class EConnClient {
         return clientSocket;
     }
 
-    @PostConstruct
     public void connect() {
         log.info("EConnClient connect.");
         clientSocket = wrapper.getClientSocket();

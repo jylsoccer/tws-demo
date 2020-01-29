@@ -8,8 +8,6 @@ import com.scy.rx.wrapper.FutureMap;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -17,18 +15,14 @@ import java.util.concurrent.TimeUnit;
 import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
-@Service
 @Slf4j
 public class TradeApiImpl implements TraderApi {
 
-    @Autowired
-    private FlowableEmitterMap flowableEmitterMap;
+    private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
 
-    @Autowired
-    private FutureMap futureMap;
+    private FutureMap futureMap = FutureMap.INSTANCE;
 
-    @Autowired
-    private EConnClient eConnClient;
+    private EConnClient eConnClient = EConnClient.INSTANCE;
 
     @Override
     public Integer reqId() {

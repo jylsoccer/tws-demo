@@ -12,26 +12,20 @@ import com.scy.rx.wrapper.FutureMap;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static com.scy.rx.wrapper.FutureMap.KEY_MANAGED_ACCOUNTS;
 
-@Service
 @Slf4j
 public class AccountApiImpl implements AccountApi {
 
-    @Autowired
-    private FlowableEmitterMap flowableEmitterMap;
+    private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
 
-    @Autowired
-    private FutureMap futureMap;
+    private FutureMap futureMap = FutureMap.INSTANCE;
 
-    @Autowired
-    private EConnClient eConnClient;
+    private EConnClient eConnClient = EConnClient.INSTANCE;
 
     @Override
     public CompletableFuture<List<String>> reqManagedAccts() {
