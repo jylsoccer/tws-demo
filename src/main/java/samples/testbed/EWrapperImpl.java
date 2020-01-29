@@ -1,20 +1,31 @@
 package samples.testbed;
 
-import com.alibaba.fastjson.JSON;
-import com.ib.client.*;
-
 import java.util.Set;
+
+import com.ib.client.CommissionReport;
+import com.ib.client.Contract;
+import com.ib.client.ContractDetails;
+import com.ib.client.DeltaNeutralContract;
+import com.ib.client.EClientSocket;
+import com.ib.client.EJavaSignal;
+import com.ib.client.EReaderSignal;
+import com.ib.client.EWrapper;
+import com.ib.client.Execution;
+import com.ib.client.Order;
+import com.ib.client.OrderState;
+import com.ib.client.SoftDollarTier;
+import com.ib.client.TickType;
 
 //! [ewrapperimpl]
 public class EWrapperImpl implements EWrapper {
 	//! [ewrapperimpl]
-
+	
 	//! [socket_declare]
 	private EReaderSignal readerSignal;
 	private EClientSocket clientSocket;
 	protected int currentOrderId = -1;
 	//! [socket_declare]
-
+	
 	//! [socket_init]
 	public EWrapperImpl() {
 		readerSignal = new EJavaSignal();
@@ -97,8 +108,6 @@ public class EWrapperImpl implements EWrapper {
 			OrderState orderState) {
 		System.out.println("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
 			order.action()+", "+order.orderType()+" "+order.totalQuantity()+", "+orderState.status());
-		System.out.println("OpenOrder. contract: " + JSON.toJSONString(contract) + ", order: " + JSON.toJSONString(order));
-
 	}
 	//! [openorder]
 	

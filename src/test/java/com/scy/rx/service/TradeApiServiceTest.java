@@ -5,10 +5,8 @@ import com.alibaba.fastjson.JSON;
 import com.ib.client.ExecutionFilter;
 import com.scy.rx.TestDemo;
 import com.scy.rx.model.ExecDetailsRequest;
-import com.scy.rx.model.OpenOrderResponse;
 import com.scy.rx.model.OrderStatusResponse;
 import com.scy.rx.model.PlaceOrderRequest;
-import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -20,7 +18,6 @@ import samples.testbed.contracts.ContractSamples;
 import samples.testbed.orders.OrderSamples;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 
 @RunWith(SpringRunner.class)

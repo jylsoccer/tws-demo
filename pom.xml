@@ -78,6 +78,9 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <optimize>true</optimize>
+                    <compilerArguments>
+                        <extdirs>lib</extdirs>
+                    </compilerArguments>
                 </configuration>
             </plugin>
             <plugin>
