@@ -1,9 +1,6 @@
 package com.scy.rx.service;
 
-import com.scy.rx.model.AccountSummaryRequest;
-import com.scy.rx.model.AccountSummaryResponse;
-import com.scy.rx.model.PositionsMultiRequest;
-import com.scy.rx.model.PositionsMultiResponse;
+import com.scy.rx.model.*;
 import io.reactivex.Flowable;
 
 import java.util.List;
@@ -20,9 +17,13 @@ public interface AccountApi {
 	CompletableFuture<List<String>> reqManagedAccts();
 
 	/**
-	 * 查持仓股票
+	 * 查持仓
 	 */
 	Flowable<PositionsMultiResponse> reqPositionsMulti(PositionsMultiRequest request);
+
+	Flowable<PositionsResponse> reqPositions();
+
+	void cancelPositions();
 
 	/**
 	 * 查账户信息

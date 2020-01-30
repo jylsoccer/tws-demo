@@ -206,6 +206,7 @@ public class Contract implements Cloneable {
             sb.append( m_symbol);
             app( sb, m_secType);
             app( sb, m_exchange);
+            app( sb, m_currency);
 
             if (m_exchange != null && m_exchange.equals( "SMART") && m_primaryExch != null) {
                 app( sb, m_primaryExch);

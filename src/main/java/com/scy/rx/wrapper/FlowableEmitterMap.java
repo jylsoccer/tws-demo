@@ -14,6 +14,7 @@ public class FlowableEmitterMap {
     public static FlowableEmitterMap INSTANCE = new FlowableEmitterMap();
 
     public static final Integer KEY_REQ_ALL_OPEN_ORDERS = -1;
+    public static final Integer KEY_REQ_POSITIONS = -2;
 
     private static final ReentrantLock lock = new ReentrantLock();
 

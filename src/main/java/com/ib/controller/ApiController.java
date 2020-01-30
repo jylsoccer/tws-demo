@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_POSITIONS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
 @Slf4j
@@ -58,7 +59,6 @@ public class ApiController implements EWrapper {
 	private final HashMap<Integer, IOrderHandler> m_orderHandlers = new HashMap<Integer, IOrderHandler>();
 	private final HashMap<Integer,IAccountSummaryHandler> m_acctSummaryHandlers = new HashMap<Integer,IAccountSummaryHandler>();
 	private final HashMap<Integer,IMarketValueSummaryHandler> m_mktValSummaryHandlers = new HashMap<Integer,IMarketValueSummaryHandler>();
-	private final ConcurrentHashSet<IPositionHandler> m_positionHandlers = new ConcurrentHashSet<IPositionHandler>();
 	private final ConcurrentHashSet<IAccountHandler> m_accountHandlers = new ConcurrentHashSet<IAccountHandler>();
 	private final ConcurrentHashSet<ILiveOrderHandler> m_liveOrderHandlers = new ConcurrentHashSet<ILiveOrderHandler>();
 	private final HashMap<Integer, IPositionMultiHandler> m_positionMultiMap = new HashMap<Integer, IPositionMultiHandler>();
@@ -257,14 +257,14 @@ public class ApiController implements EWrapper {
 		accountApi.reqAccountSummary(new AccountSummaryRequest(reqId, group, Joiner.on(",").skipNulls().join(tags)))
 				.subscribeOn(Schedulers.newThread())
 				.subscribe(response -> {
-							log.debug("position:{}", JSON.toJSONString(response));
+							log.debug("AccountSummary:{}", JSON.toJSONString(response));
 							handler.accountSummary(response.getAccount(), AccountSummaryTag.valueOf(response.getTag()), response.getValue(), response.getCurrency());
 						},
 						error -> {
-							log.error("reqMktData error.", error);
+							log.error("AccountSummary error.", error);
 						},
 						() -> {
-							log.debug("position end");
+							log.debug("AccountSummary end");
 							handler.accountSummaryEnd();
 						});
 		sendEOM();
@@ -327,8 +327,6 @@ public class ApiController implements EWrapper {
 		FlowableEmitter<AccountSummaryResponse> emitter = flowableEmitterMap.get(reqId);
 		if (emitter != null) {
 			emitter.onComplete();
-//			flowableEmitterMap.remove(reqId);
-//			log.debug("accountSummaryEnd, reqId:{} removed.", reqId);
 		}
 		recEOM();
 	}
@@ -343,8 +341,19 @@ public class ApiController implements EWrapper {
 		if (!checkConnection())
 			return;
 
-		m_positionHandlers.add( handler);
-		m_client.reqPositions();
+		accountApi.reqPositions()
+		.subscribeOn(Schedulers.newThread())
+		.subscribe(response -> {
+					log.debug("position:{}", JSON.toJSONString(response));
+					handler.position(response.getAccount(), response.getContract(), response.getPos(), response.getAvgCost());
+				},
+				error -> {
+					log.error("position error.", error);
+				},
+				() -> {
+					log.debug("position end");
+					handler.positionEnd();
+				});
 		sendEOM();
 	}
 
@@ -352,21 +361,31 @@ public class ApiController implements EWrapper {
 		if (!checkConnection())
 			return;
 
-		m_positionHandlers.remove( handler);
-		m_client.cancelPositions();
+		accountApi.cancelPositions();
 		sendEOM();
 	}
 
-	@Override public void position(String account, Contract contract, double pos, double avgCost) {
-		for (IPositionHandler handler : m_positionHandlers) {
-			handler.position( account, contract, pos, avgCost);
+	@Override
+	public void position(String account, Contract contract, double pos,
+						 double avgCost) {
+		log.debug("Position. "+account+" - Symbol: "+contract.symbol()+", SecType: "+contract.secType()+", Currency: "+contract.currency()+", Position: "+pos+", Avg cost: "+avgCost);
+		PositionsResponse response = new PositionsResponse(account, contract, pos, avgCost);
+		FlowableEmitter<PositionsResponse> emitter = flowableEmitterMap.get(KEY_REQ_POSITIONS);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
 		}
 		recEOM();
 	}
 
-	@Override public void positionEnd() {
-		for (IPositionHandler handler : m_positionHandlers) {
-			handler.positionEnd();
+	@Override
+	public void positionEnd() {
+		log.debug("PositionEnd \n");
+		FlowableEmitter<PositionsResponse> emitter = flowableEmitterMap.get(KEY_REQ_POSITIONS);
+		if (emitter != null) {
+			emitter.onComplete();
+			flowableEmitterMap.remove(KEY_REQ_POSITIONS);
+			log.info("positionEnd, KEY_REQ_POSITIONS removed.");
 		}
 		recEOM();
 	}

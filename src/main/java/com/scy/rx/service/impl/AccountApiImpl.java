@@ -2,10 +2,7 @@ package com.scy.rx.service.impl;
 
 
 import com.scy.apidemo.ApiDemo;
-import com.scy.rx.model.AccountSummaryRequest;
-import com.scy.rx.model.AccountSummaryResponse;
-import com.scy.rx.model.PositionsMultiRequest;
-import com.scy.rx.model.PositionsMultiResponse;
+import com.scy.rx.model.*;
 import com.scy.rx.service.AccountApi;
 import com.scy.rx.wrapper.FlowableEmitterMap;
 import com.scy.rx.wrapper.FutureMap;
@@ -16,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_POSITIONS;
 import static com.scy.rx.wrapper.FutureMap.KEY_MANAGED_ACCOUNTS;
 
 @Slf4j
@@ -62,6 +60,30 @@ public class AccountApiImpl implements AccountApi {
             }
         }
         throw new RuntimeException("try lock failed.");
+    }
+
+    @Override
+    public Flowable<PositionsResponse> reqPositions() {
+        if (FlowableEmitterMap.tryLock()) {
+            try {
+                if (flowableEmitterMap.get(KEY_REQ_POSITIONS) != null) {
+                    throw new RuntimeException("reqPositionsMulti is not available.");
+                }
+                return Flowable.<PositionsResponse>create(emitter -> {
+                            flowableEmitterMap.put(KEY_REQ_POSITIONS, emitter);
+                            ApiDemo.getClient().reqPositions();
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.unlock();
+            }
+        }
+        throw new RuntimeException("try lock failed.");
+    }
+
+    @Override
+    public void cancelPositions() {
+        ApiDemo.getClient().cancelPositions();
     }
 
     @Override

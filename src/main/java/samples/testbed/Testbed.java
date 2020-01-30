@@ -40,10 +40,11 @@ public class Testbed {
         	}
         }.start();
         //! [ereader]
-		wrapper.getClient().reqMarketDataType(MarketDataType.DELAYED);
+		wrapper.getClient().reqPositions();
+
 
 //		wrapper.getClient().reqMktData(1001, ContractSamples.EurGbpFx(), "", false, null);;
-		wrapper.getClient().reqMktData(1001, ContractSamples.USStock(), "", false, null);;
+//		wrapper.getClient().reqMktData(1001, ContractSamples.USStock(), "", false, null);;
 		//orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
 		//contractOperations(wrapper.getClient());
         //hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());

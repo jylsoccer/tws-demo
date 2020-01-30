@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
+import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_POSITIONS;
 import static com.scy.rx.wrapper.FutureMap.KEY_MANAGED_ACCOUNTS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
@@ -378,16 +379,26 @@ public class MultiplexWrapperImpl implements EWrapper {
 	public void position(String account, Contract contract, double pos,
 			double avgCost) {
 		System.out.println("Position. "+account+" - Symbol: "+contract.symbol()+", SecType: "+contract.secType()+", Currency: "+contract.currency()+", Position: "+pos+", Avg cost: "+avgCost);
+		PositionsResponse response = new PositionsResponse(account, contract, pos, avgCost);
+		FlowableEmitter<PositionsResponse> emitter = flowableEmitterMap.get(KEY_REQ_POSITIONS);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
+		}
 	}
 	//! [position]
 	
-	//! [positionend]
 	@Override
 	public void positionEnd() {
 		System.out.println("PositionEnd \n");
+		FlowableEmitter<PositionsResponse> emitter = flowableEmitterMap.get(KEY_REQ_POSITIONS);
+		if (emitter != null) {
+			emitter.onComplete();
+			flowableEmitterMap.remove(KEY_REQ_POSITIONS);
+			log.info("positionEnd, KEY_REQ_POSITIONS removed.");
+		}
 	}
-	//! [positionend]
-	
+
 	//! [accountsummary]
 	@Override
 	public void accountSummary(int reqId, String account, String tag,
