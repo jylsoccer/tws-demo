@@ -4,18 +4,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.ib.client.*;
 import samples.testbed.advisor.FAMethodSamples;
 import samples.testbed.contracts.ContractSamples;
 import samples.testbed.orders.AvailableAlgoParams;
 import samples.testbed.orders.OrderSamples;
 import samples.testbed.scanner.ScannerSubscriptionSamples;
 
-import com.ib.client.Contract;
-import com.ib.client.EClientSocket;
-import com.ib.client.EReader;
-import com.ib.client.EReaderSignal;
-import com.ib.client.ExecutionFilter;
-import com.ib.client.Order;
 import com.ib.client.Types.FADataType;
 import com.ib.controller.AccountSummaryTag;
 
@@ -27,7 +22,7 @@ public class Testbed {
 		final EClientSocket m_client = wrapper.getClient();
 		final EReaderSignal m_signal = wrapper.getSignal();
 		//! [connect]
-		m_client.eConnect("127.0.0.1", 7496, 0);
+		m_client.eConnect("127.0.0.1", 7497, 0);
 		//! [connect]
 		//! [ereader]
 		final EReader reader = new EReader(m_client, m_signal);        
@@ -45,8 +40,10 @@ public class Testbed {
         	}
         }.start();
         //! [ereader]
-        Thread.sleep(1000);
-		
+		wrapper.getClient().reqMarketDataType(MarketDataType.DELAYED);
+
+//		wrapper.getClient().reqMktData(1001, ContractSamples.EurGbpFx(), "", false, null);;
+		wrapper.getClient().reqMktData(1001, ContractSamples.USStock(), "", false, null);;
 		//orderOperations(wrapper.getClient(), wrapper.getCurrentOrderId());
 		//contractOperations(wrapper.getClient());
         //hedgeSample(wrapper.getClient(), wrapper.getCurrentOrderId());

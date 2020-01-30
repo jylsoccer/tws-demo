@@ -117,15 +117,19 @@ class TopModel extends AbstractTableModel {
 		@Override public void tickPrice( TickType tickType, double price, int canAutoExecute) {
 			switch( tickType) {
 				case BID:
+				case DELAYED_BID:
 					m_bid = price;
 					break;
 				case ASK:
+				case DELAYED_ASK:
 					m_ask = price;
 					break;
 				case LAST:
+				case DELAYED_LAST:
 					m_last = price;
 					break;
 				case CLOSE:
+				case DELAYED_CLOSE:
 					m_close = price;
 					break;
 				default: break;	

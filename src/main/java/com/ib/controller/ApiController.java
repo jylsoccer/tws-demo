@@ -280,7 +280,8 @@ public class ApiController implements EWrapper {
 		
 		Integer reqId = getAndRemoveKey( m_acctSummaryHandlers, handler);
 		if (reqId != null) {
-			m_client.cancelAccountSummary( reqId);
+			flowableEmitterMap.remove(reqId);
+			accountApi.cancelAccountSummary(reqId);
 			sendEOM();
 		}
 	}
