@@ -351,9 +351,9 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 
 		public void update( Position position) {
 			// skip fake FX positions
-			if (position.contract().secType() == SecType.CASH) {
-				return;
-			}
+//			if (position.contract().secType() == SecType.CASH) {
+//				return;
+//			}
 
 			if (!m_portfolioMap.containsKey( position.conid() ) && position.position() != 0) {
 				m_positions.add( position.conid() );

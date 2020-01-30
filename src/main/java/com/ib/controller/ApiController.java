@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ACCOUNT_UPDATES;
 import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_POSITIONS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
@@ -59,7 +60,6 @@ public class ApiController implements EWrapper {
 	private final HashMap<Integer, IOrderHandler> m_orderHandlers = new HashMap<Integer, IOrderHandler>();
 	private final HashMap<Integer,IAccountSummaryHandler> m_acctSummaryHandlers = new HashMap<Integer,IAccountSummaryHandler>();
 	private final HashMap<Integer,IMarketValueSummaryHandler> m_mktValSummaryHandlers = new HashMap<Integer,IMarketValueSummaryHandler>();
-	private final ConcurrentHashSet<IAccountHandler> m_accountHandlers = new ConcurrentHashSet<IAccountHandler>();
 	private final ConcurrentHashSet<ILiveOrderHandler> m_liveOrderHandlers = new ConcurrentHashSet<ILiveOrderHandler>();
 	private final HashMap<Integer, IPositionMultiHandler> m_positionMultiMap = new HashMap<Integer, IPositionMultiHandler>();
 	private final HashMap<Integer, IAccountUpdateMultiHandler> m_accountUpdateMultiMap = new HashMap<Integer, IAccountUpdateMultiHandler>();
@@ -196,43 +196,87 @@ public class ApiController implements EWrapper {
 		if (!checkConnection())
 			return;
 
-		m_accountHandlers.add( handler);
-    	m_client.reqAccountUpdates(subscribe, acctCode);
+    	accountApi.reqAccountUpdates(new AccountUpdatesRequest(subscribe, acctCode))
+				.subscribeOn(Schedulers.newThread())
+				.subscribe(
+						response -> {
+							if (response instanceof AccountTimeResponse) {
+								AccountTimeResponse accountTimeResponse = (AccountTimeResponse) response;
+								handler.accountTime(accountTimeResponse.getTimeStamp());
+							} else if (response instanceof AccountDownloadEndResponse) {
+								AccountDownloadEndResponse accountDownloadEndResponse = (AccountDownloadEndResponse) response;
+								handler.accountDownloadEnd(accountDownloadEndResponse.getAccount());
+							} else if (response instanceof AccountValueResponse) {
+								AccountValueResponse accountValueResponse = (AccountValueResponse) response;
+								handler.accountValue(accountValueResponse.getAccount(), accountValueResponse.getTag(), accountValueResponse.getValue(), accountValueResponse.getCurrency());
+							} else if (response instanceof PortfolioResponse) {
+								PortfolioResponse portfolioResponse = (PortfolioResponse) response;
+								handler.updatePortfolio(new Position(portfolioResponse.getContract(), portfolioResponse.getAccount(), portfolioResponse.getPositionIn()
+										, portfolioResponse.getMarketPrice(), portfolioResponse.getMarketValue(), portfolioResponse.getAverageCost(), portfolioResponse.getUnrealizedPNL()
+										, portfolioResponse.getRealizedPNL()));
+							}
+						},
+						error -> {
+							log.error("accountApi.reqAccountUpdates error.", error);
+						},
+						() -> {
+							log.debug("accountApi.reqAccountUpdates end");
+						});
 		sendEOM();
-    }
+	}
 
 	@Override public void updateAccountValue(String tag, String value, String currency, String account) {
+		log.debug("updateAccountValue, tag:{}, value:{}, currency:{}, account:{}", tag, value, currency, account);
 		if (tag.equals( "Currency") ) { // ignore this, it is useless
 			return;
 		}
 
-		for( IAccountHandler handler : m_accountHandlers) {
-			handler.accountValue( account, tag, value, currency);
+		AccountUpdatesResponse response = new AccountValueResponse(tag, value, currency, account);
+		FlowableEmitter<AccountUpdatesResponse> emitter = flowableEmitterMap.get(KEY_REQ_ACCOUNT_UPDATES);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
 		}
+		log.warn("updateAccountValue, emitter not registered. reqId:KEY_REQ_ACCOUNT_UPDATES");
 		recEOM();
 	}
 
 	@Override public void updateAccountTime(String timeStamp) {
-		for( IAccountHandler handler : m_accountHandlers) {
-			handler.accountTime( timeStamp);
+		log.debug("updateAccountTime, timeStamp:{}", timeStamp);
+		AccountUpdatesResponse response = new AccountTimeResponse(timeStamp);
+		FlowableEmitter<AccountUpdatesResponse> emitter = flowableEmitterMap.get(KEY_REQ_ACCOUNT_UPDATES);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
 		}
+		log.warn("updateAccountTime, emitter not registered. reqId:KEY_REQ_ACCOUNT_UPDATES");
 		recEOM();
 	}
 
 	@Override public void accountDownloadEnd(String account) {
-		for( IAccountHandler handler : m_accountHandlers) {
-			handler.accountDownloadEnd( account);
+		log.debug("accountDownloadEnd, account:{}", account);
+		AccountUpdatesResponse response = new AccountDownloadEndResponse(account);
+		FlowableEmitter<AccountUpdatesResponse> emitter = flowableEmitterMap.get(KEY_REQ_ACCOUNT_UPDATES);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
 		}
+		log.warn("accountDownloadEnd, emitter not registered. reqId:KEY_REQ_ACCOUNT_UPDATES");
 		recEOM();
 	}
 
 	@Override public void updatePortfolio(Contract contract, double positionIn, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, String account) {
+		log.debug("updatePortfolio, account:{}", account);
+
 		contract.exchange( contract.primaryExch());
 
-		Position position = new Position( contract, account, positionIn, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL);
-		for( IAccountHandler handler : m_accountHandlers) {
-			handler.updatePortfolio( position);
+		AccountUpdatesResponse response = new PortfolioResponse(contract, positionIn, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, account);
+		FlowableEmitter<AccountUpdatesResponse> emitter = flowableEmitterMap.get(KEY_REQ_ACCOUNT_UPDATES);
+		if (emitter != null) {
+			emitter.onNext(response);
+			return;
 		}
+		log.warn("updatePortfolio, emitter not registered. reqId:KEY_REQ_ACCOUNT_UPDATES");
 		recEOM();
 	}
 
@@ -862,7 +906,7 @@ public class ApiController implements EWrapper {
 				m_orderHandlers.put( order.orderId(), handler);
 			}
 		}
-
+// TODO: 2020/1/30  
 		m_client.placeOrder( contract, order);
 		sendEOM();
 	}

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ACCOUNT_UPDATES;
 import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_POSITIONS;
 import static com.scy.rx.wrapper.FutureMap.KEY_MANAGED_ACCOUNTS;
 
@@ -107,5 +108,25 @@ public class AccountApiImpl implements AccountApi {
     @Override
     public void cancelAccountSummary(int reqId) {
         ApiDemo.getClient().cancelAccountSummary(reqId);
+    }
+
+    @Override
+    public Flowable<AccountUpdatesResponse> reqAccountUpdates(AccountUpdatesRequest request) {
+        if (FlowableEmitterMap.tryLock()) {
+            try {
+                if (flowableEmitterMap.get(KEY_REQ_ACCOUNT_UPDATES) != null) {
+                    throw new RuntimeException("reqAccountUpdates is not available.");
+                }
+                return Flowable.<AccountUpdatesResponse>create(
+                        emitter -> {
+                            flowableEmitterMap.put(KEY_REQ_ACCOUNT_UPDATES, emitter);
+                            ApiDemo.getClient().reqAccountUpdates(request.isSubscribe(), request.getAcctCode());
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.unlock();
+            }
+        }
+        throw new RuntimeException("try lock failed.");
     }
 }

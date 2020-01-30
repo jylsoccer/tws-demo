@@ -34,4 +34,7 @@ public interface AccountApi {
 	 * 取消账户信息查询
 	 */
 	void cancelAccountSummary(int reqId);
+
+	Flowable<AccountUpdatesResponse> reqAccountUpdates(AccountUpdatesRequest request);
+
 }

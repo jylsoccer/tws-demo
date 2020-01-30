@@ -15,6 +15,7 @@ public class FlowableEmitterMap {
 
     public static final Integer KEY_REQ_ALL_OPEN_ORDERS = -1;
     public static final Integer KEY_REQ_POSITIONS = -2;
+    public static final Integer KEY_REQ_ACCOUNT_UPDATES = -3;
 
     private static final ReentrantLock lock = new ReentrantLock();
 
