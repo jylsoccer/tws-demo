@@ -253,6 +253,7 @@ public class ApiController implements EWrapper {
 			return;
 
 		int reqId = m_reqId++;
+		m_acctSummaryHandlers.put( reqId, handler);
 		accountApi.reqAccountSummary(new AccountSummaryRequest(reqId, group, Joiner.on(",").skipNulls().join(tags)))
 				.subscribeOn(Schedulers.newThread())
 				.subscribe(response -> {
@@ -486,7 +487,8 @@ public class ApiController implements EWrapper {
 			return;
 
     	int reqId = m_reqId++;
-    	marketApi.reqMktData(new MktDataRequest(reqId, contract, genericTickList, snapshot, Collections.<TagValue>emptyList()))
+		m_topMktDataMap.put( reqId, handler);
+		marketApi.reqMktData(new MktDataRequest(reqId, contract, genericTickList, snapshot, Collections.<TagValue>emptyList()))
 				.subscribeOn(Schedulers.newThread())
 				.subscribe(
 						tickResponse -> {
@@ -533,7 +535,8 @@ public class ApiController implements EWrapper {
 
 		Integer reqId = getAndRemoveKey( m_topMktDataMap, handler);
     	if (reqId != null) {
-    		m_client.cancelMktData( reqId);
+			flowableEmitterMap.remove(reqId);
+			marketApi.cancelMktData( reqId);
     	}
     	else {
     		show( "Error: could not cancel top market data");
@@ -560,6 +563,7 @@ public class ApiController implements EWrapper {
 	}
 
 	@Override public void tickGeneric(int reqId, int tickType, double value) {
+		log.debug("tickGeneric. Ticker Id:"+reqId+", Field: "+tickType+", Price: "+value);
 		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
 		if (handler != null) {
 			handler.tickPrice( TickType.get( tickType), value, 0);
@@ -596,6 +600,7 @@ public class ApiController implements EWrapper {
 	}
 
 	@Override public void tickString(int reqId, int tickType, String value) {
+		log.debug("tickString. Ticker Id:"+reqId+", Field: "+tickType+", Price: "+value);
 		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
 		if (handler != null) {
 			handler.tickString( TickType.get( tickType), value);
@@ -604,6 +609,7 @@ public class ApiController implements EWrapper {
 	}
 
 	@Override public void tickEFP(int reqId, int tickType, double basisPoints, String formattedBasisPoints, double impliedFuture, int holdDays, String futureLastTradeDate, double dividendImpact, double dividendsToLastTradeDate) {
+		log.debug("tickEFP. Ticker Id: {}, tickType:{} ", reqId, tickType);
 		IEfpHandler handler = m_efpMap.get( reqId);
 		if (handler != null) {
 			handler.tickEFP( tickType, basisPoints, formattedBasisPoints, impliedFuture, holdDays, futureLastTradeDate, dividendImpact, dividendsToLastTradeDate);
@@ -612,6 +618,7 @@ public class ApiController implements EWrapper {
 	}
 
 	@Override public void tickSnapshotEnd(int reqId) {
+		log.debug("tickSnapshotEnd. Ticker Id: {}", reqId);
 		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
 		if (handler != null) {
 			handler.tickSnapshotEnd();
@@ -620,6 +627,7 @@ public class ApiController implements EWrapper {
 	}
 
 	@Override public void marketDataType(int reqId, int marketDataType) {
+		log.debug("marketDataType. reqId: {}", reqId);
 		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
 		if (handler != null) {
 			handler.marketDataType( MktDataType.get( marketDataType) );

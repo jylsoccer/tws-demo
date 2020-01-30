@@ -57,7 +57,7 @@ public class MarketApiImpl implements MarketApi {
 
     @Override
     public void cancelMktData(int tickerId) {
-        ApiDemo.getClient().cancelOrder(tickerId);
+        ApiDemo.getClient().cancelMktData(tickerId);
     }
 
     @Override
