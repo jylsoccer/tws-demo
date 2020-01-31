@@ -1062,6 +1062,7 @@ public class ApiController implements EWrapper {
 				emitter.onComplete();
 			}
 		}
+		flowableEmitterMap.clearOrderEmitters();
 		recEOM();
 	}
 
