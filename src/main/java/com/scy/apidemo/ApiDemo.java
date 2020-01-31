@@ -4,6 +4,8 @@
 package com.scy.apidemo;
 
 
+import com.google.common.collect.Lists;
+import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.scy.apidemo.util.IConnectionConfiguration.DefaultConnectionConfiguration;
 import com.ib.client.Types.NewsType;
@@ -111,7 +113,7 @@ public class ApiDemo implements IConnectionHandler {
         m_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
         
         // make initial connection to local host, port 7496, client id 0, no connection options
-		controller().connect( "127.0.0.1", 7496, 0, m_connectionConfiguration.getDefaultConnectOptions() != null ? "" : null );
+		controller().connect( "127.0.0.1", 7497, 0, m_connectionConfiguration.getDefaultConnectOptions() != null ? "" : null );
     }
 	
 	@Override public void connected() {
@@ -131,6 +133,8 @@ public class ApiDemo implements IConnectionHandler {
 				show( message);
 			}
 		});
+		// 连接成功后，订阅收藏行情
+		m_mktDataPanel.initSelected();
 	}
 	
 	@Override public void disconnected() {

@@ -3,8 +3,6 @@
 
 package com.scy.apidemo;
 
-import com.scy.apidemo.util.NewTabbedPanel.NewTabPanel;
-import com.scy.apidemo.util.VerticalPanel.StackPanel;
 import com.ib.client.Contract;
 import com.ib.client.ContractDetails;
 import com.ib.client.ScannerSubscription;
@@ -14,6 +12,8 @@ import com.ib.controller.Bar;
 import com.ib.controller.Instrument;
 import com.ib.controller.ScanCode;
 import com.scy.apidemo.util.*;
+import com.scy.apidemo.util.NewTabbedPanel.NewTabPanel;
+import com.scy.apidemo.util.VerticalPanel.StackPanel;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -42,6 +42,17 @@ public class MarketDataPanel extends JPanel {
 		setLayout( new BorderLayout() );
 		add( m_requestPanel, BorderLayout.NORTH);
 		add( m_resultsPanel);
+	}
+
+	public void initSelected() {
+		if (m_topResultPanel == null) {
+			m_topResultPanel = new MarketDataPanel.TopResultsPanel();
+			m_resultsPanel.addTab( "Top Data", m_topResultPanel, true, true);
+		}
+
+		for (Contract contract : SelectedContractsConf.getContracts(this.getClass().getClassLoader().getResource("selectedContracts.json").getPath())) {
+			m_topResultPanel.m_model.addRow(contract);
+		}
 	}
 	
 	private class TopRequestPanel extends JPanel {

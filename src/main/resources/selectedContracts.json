@@ -1,0 +1,14 @@
+[
+  {
+    "symbol": "EUR",
+    "secType": "CASH",
+    "exchange": "IDEALPRO",
+    "currency": "USD"
+  },
+  {
+    "symbol": "EUR",
+    "secType": "CASH",
+    "exchange": "IDEALPRO",
+    "currency": "GBP"
+  }
+]

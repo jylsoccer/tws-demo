@@ -12,6 +12,7 @@ import com.ib.controller.Formats;
 import com.scy.rx.model.MktDataRequest;
 import com.scy.rx.service.MarketApi;
 import com.scy.rx.service.impl.MarketApiImpl;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -19,22 +20,33 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 import static com.ib.controller.Formats.*;
 
+@Slf4j
 class TopModel extends AbstractTableModel {
 	private ArrayList<TopRow> m_rows = new ArrayList<TopRow>();
 
 	void addRow( Contract contract) {
 		TopRow row = new TopRow( this, contract.description() );
+		if (isRowExists(row)) {
+			log.info("row already exists: {}", row.m_description);
+			return;
+		}
 		m_rows.add( row);
 		ApiDemo.INSTANCE.controller().reqTopMktData(contract, "", false, row);
 		fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
 	}
 
-	void addRow( TopRow row) {
-		m_rows.add( row);
-		fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
+	private boolean isRowExists(TopRow row) {
+		String desc = row.m_description;
+		for (TopRow iRow : m_rows) {
+			if (Objects.equals(iRow.m_description, desc)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void desubscribe() {
