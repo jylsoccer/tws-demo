@@ -28,7 +28,9 @@ public interface TradeApi {
 	Flowable<ExecDetailsResponse> reqExecutions(ExecDetailsRequest request);
 
 	/**
-	 * 查所有未成交订单
+	 * 查订单
 	 */
-	Flowable<OpenOrderResponse> reqAllOpenOrders();
+	Flowable<OrderResponse> reqAllOpenOrders();
+	Flowable<OrderResponse> reqOpenOrders();
+	Flowable<OrderResponse> reqAutoOpenOrders(boolean bAutoBind);
 }

@@ -3,8 +3,7 @@ package com.scy.rx.model;
 import lombok.Data;
 
 @Data
-public class OrderStatusResponse {
-    private int orderId;
+public class OrderStatusResponse extends OrderResponse {
     private String status;
     private double filled;
     private double remaining;

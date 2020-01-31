@@ -1,5 +1,7 @@
 package com.scy.rx.wrapper;
 
+import com.ib.controller.ConcurrentHashSet;
+import com.scy.rx.model.OrderResponse;
 import io.reactivex.FlowableEmitter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,11 +13,11 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 public class FlowableEmitterMap {
 
-    public static FlowableEmitterMap INSTANCE = new FlowableEmitterMap();
+    public final static FlowableEmitterMap INSTANCE = new FlowableEmitterMap();
 
-    public static final Integer KEY_REQ_ALL_OPEN_ORDERS = -1;
     public static final Integer KEY_REQ_POSITIONS = -2;
     public static final Integer KEY_REQ_ACCOUNT_UPDATES = -3;
+
 
     private static final ReentrantLock lock = new ReentrantLock();
 
@@ -44,6 +46,23 @@ public class FlowableEmitterMap {
             return size() > 500;
         }
     };
+    private final ConcurrentHashSet<FlowableEmitter<OrderResponse>> orderEmitters = new ConcurrentHashSet<>();
+
+    public ConcurrentHashSet<FlowableEmitter<OrderResponse>> getOrderEmitters() {
+        return orderEmitters;
+    }
+
+    public boolean addOrderEmitters(FlowableEmitter<OrderResponse> emitter) {
+        return orderEmitters.add(emitter);
+    }
+
+    public boolean removeOrderEmitters(FlowableEmitter<OrderResponse> emitter) {
+        return orderEmitters.remove(emitter);
+    }
+
+    public void clearOrderEmitters() {
+        orderEmitters.clear();
+    }
 
     public FlowableEmitter put(Integer key, FlowableEmitter emitter) {
         return flowableEmitterMap.putIfAbsent(key, emitter);

@@ -26,8 +26,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
-import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ACCOUNT_UPDATES;
-import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_POSITIONS;
+import static com.scy.rx.wrapper.FlowableEmitterMap.*;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
 @Slf4j
@@ -162,8 +161,8 @@ public class ApiController implements EWrapper {
 			handler.handle( errorCode, errorMsg);
 		}
 
-		for (ILiveOrderHandler liveHandler : m_liveOrderHandlers) {
-			liveHandler.handle( id, errorCode, errorMsg);
+		for (FlowableEmitter<OrderResponse> emitter : FlowableEmitterMap.INSTANCE.getOrderEmitters()) {
+			emitter.onError(new OrderException(id, errorCode, errorMsg));
 		}
 
 		// "no sec def found" response?
@@ -950,66 +949,134 @@ public class ApiController implements EWrapper {
 		void handle(int orderId, int errorCode, String errorMsg);  // add permId?
 	}
 
-	public void reqLiveOrders( ILiveOrderHandler handler) {
+	public void reqLiveOrders(ILiveOrderHandler handler) {
 		if (!checkConnection())
 			return;
 
-		m_liveOrderHandlers.add( handler);
-		m_client.reqAllOpenOrders();
+		tradeApi.reqAllOpenOrders()
+				.subscribeOn(Schedulers.newThread())
+				.subscribe(response -> {
+							if (response instanceof OpenOrderResponse) {
+								OpenOrderResponse openOrderResponse = (OpenOrderResponse) response;
+								handler.openOrder(openOrderResponse.getContract(), openOrderResponse.getOrder(), openOrderResponse.getOrderState());
+							} else if (response instanceof OrderStatusResponse) {
+								OrderStatusResponse orderStatusResponse = (OrderStatusResponse) response;
+								handler.orderStatus(orderStatusResponse.getOrderId(), OrderStatus.valueOf(orderStatusResponse.getStatus()), orderStatusResponse.getFilled(), orderStatusResponse.getRemaining()
+										, orderStatusResponse.getAvgFillPrice(), orderStatusResponse.getPermId(), orderStatusResponse.getParentId(), orderStatusResponse.getLastFillPrice()
+										, orderStatusResponse.getClientId(), orderStatusResponse.getWhyHeld());
+							}
+						},
+						error -> {
+							log.error("tradeApi.reqAllOpenOrders error.", error);
+							OrderException orderException = (OrderException)error;
+							handler.handle(orderException.getOrderId(), orderException.getErrorCode(), orderException.getErrorMsg());
+						},
+						() -> {
+							log.debug("tradeApi.reqAllOpenOrders end");
+							handler.openOrderEnd();
+						});
 		sendEOM();
 	}
 
-	public void takeTwsOrders( ILiveOrderHandler handler) {
+	public void takeTwsOrders(ILiveOrderHandler handler) {
 		if (!checkConnection())
 			return;
 
-		m_liveOrderHandlers.add( handler);
-		m_client.reqOpenOrders();
+		tradeApi.reqOpenOrders()
+				.subscribeOn(Schedulers.newThread())
+				.subscribe(response -> {
+							if (response instanceof OpenOrderResponse) {
+								OpenOrderResponse openOrderResponse = (OpenOrderResponse) response;
+								handler.openOrder(openOrderResponse.getContract(), openOrderResponse.getOrder(), openOrderResponse.getOrderState());
+							} else if (response instanceof OrderStatusResponse) {
+								OrderStatusResponse orderStatusResponse = (OrderStatusResponse) response;
+								handler.orderStatus(orderStatusResponse.getOrderId(), OrderStatus.valueOf(orderStatusResponse.getStatus()), orderStatusResponse.getFilled(), orderStatusResponse.getRemaining()
+										, orderStatusResponse.getAvgFillPrice(), orderStatusResponse.getPermId(), orderStatusResponse.getParentId(), orderStatusResponse.getLastFillPrice()
+										, orderStatusResponse.getClientId(), orderStatusResponse.getWhyHeld());
+							}
+						},
+						error -> {
+							log.error("tradeApi.reqOpenOrders error.", error);
+							OrderException orderException = (OrderException)error;
+							handler.handle(orderException.getOrderId(), orderException.getErrorCode(), orderException.getErrorMsg());
+						},
+						() -> {
+							log.debug("tradeApi.reqOpenOrders end");
+							handler.openOrderEnd();
+						});
 		sendEOM();
 	}
 
-	public void takeFutureTwsOrders( ILiveOrderHandler handler) {
+	public void takeFutureTwsOrders(ILiveOrderHandler handler) {
 		if (!checkConnection())
 			return;
 
-		m_liveOrderHandlers.add( handler);
-		m_client.reqAutoOpenOrders( true);
+		tradeApi.reqAutoOpenOrders( true)
+				.subscribeOn(Schedulers.newThread())
+				.subscribe(response -> {
+							if (response instanceof OpenOrderResponse) {
+								OpenOrderResponse openOrderResponse = (OpenOrderResponse) response;
+								handler.openOrder(openOrderResponse.getContract(), openOrderResponse.getOrder(), openOrderResponse.getOrderState());
+							} else if (response instanceof OrderStatusResponse) {
+								OrderStatusResponse orderStatusResponse = (OrderStatusResponse) response;
+								handler.orderStatus(orderStatusResponse.getOrderId(), OrderStatus.valueOf(orderStatusResponse.getStatus()), orderStatusResponse.getFilled(), orderStatusResponse.getRemaining()
+										, orderStatusResponse.getAvgFillPrice(), orderStatusResponse.getPermId(), orderStatusResponse.getParentId(), orderStatusResponse.getLastFillPrice()
+										, orderStatusResponse.getClientId(), orderStatusResponse.getWhyHeld());
+							}
+						},
+						error -> {
+							log.error("tradeApi.reqAutoOpenOrders error.", error);
+							OrderException orderException = (OrderException)error;
+							handler.handle(orderException.getOrderId(), orderException.getErrorCode(), orderException.getErrorMsg());
+						},
+						() -> {
+							log.debug("tradeApi.reqAutoOpenOrders end");
+							handler.openOrderEnd();
+						});
 		sendEOM();
 	}
 
-	public void removeLiveOrderHandler(ILiveOrderHandler handler) {
-		m_liveOrderHandlers.remove( handler);
-	}
 
 	@Override public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
+		log.debug("openOrder. orderId:{}", orderId);
 		IOrderHandler handler = m_orderHandlers.get( orderId);
 		if (handler != null) {
 			handler.orderState(orderState);
 		}
 
 		if (!order.whatIf() ) {
-			for (ILiveOrderHandler liveHandler : m_liveOrderHandlers) {
-				liveHandler.openOrder( contract, order, orderState );
+			OpenOrderResponse response = new OpenOrderResponse(orderId, contract, order, orderState);
+			for (FlowableEmitter<OrderResponse> emitter : flowableEmitterMap.getOrderEmitters()) {
+				if (emitter != null) {
+					emitter.onNext(response);
+				}
 			}
 		}
 		recEOM();
 	}
 
 	@Override public void openOrderEnd() {
-		for (ILiveOrderHandler handler : m_liveOrderHandlers) {
-			handler.openOrderEnd();
+		log.debug("openOrderEnd.");
+		for (FlowableEmitter<OrderResponse> emitter : flowableEmitterMap.getOrderEmitters()) {
+			if (emitter != null) {
+				emitter.onComplete();
+			}
 		}
 		recEOM();
 	}
 
 	@Override public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+		log.debug("orderStatus. orderId:{}", orderId);
 		IOrderHandler handler = m_orderHandlers.get( orderId);
 		if (handler != null) {
 			handler.orderStatus( OrderStatus.valueOf( status), filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
 		}
 
-		for (ILiveOrderHandler liveOrderHandler : m_liveOrderHandlers) {
-			liveOrderHandler.orderStatus(orderId, OrderStatus.valueOf( status), filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
+		OrderStatusResponse response = new OrderStatusResponse(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
+		for (FlowableEmitter<OrderResponse> emitter : flowableEmitterMap.getOrderEmitters()) {
+			if (emitter != null) {
+				emitter.onNext(response);
+			}
 		}
 		recEOM();
 	}

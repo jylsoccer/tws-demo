@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
 
 @Slf4j
@@ -99,16 +98,47 @@ public class TradeApiImpl implements TradeApi {
     }
 
     @Override
-    public Flowable<OpenOrderResponse> reqAllOpenOrders() {
+    public Flowable<OrderResponse> reqAllOpenOrders() {
         if (FlowableEmitterMap.tryLock()) {
             try {
-                if (flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS) != null) {
-                    throw new RuntimeException("reqAllOpenOrders is not available.");
-                }
-                return Flowable.<OpenOrderResponse>create(
+                return Flowable.<OrderResponse>create(
                         emitter -> {
-                            flowableEmitterMap.put(KEY_REQ_ALL_OPEN_ORDERS, emitter);
+                            flowableEmitterMap.addOrderEmitters(emitter);
                             ApiDemo.getClient().reqAllOpenOrders();
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.unlock();
+            }
+        }
+        throw new RuntimeException("try lock failed.");
+    }
+
+    @Override
+    public Flowable<OrderResponse> reqOpenOrders() {
+        if (FlowableEmitterMap.tryLock()) {
+            try {
+                return Flowable.<OrderResponse>create(
+                        emitter -> {
+                            flowableEmitterMap.addOrderEmitters(emitter);
+                            ApiDemo.getClient().reqOpenOrders();
+                        },
+                        BackpressureStrategy.BUFFER).cache();
+            } finally {
+                FlowableEmitterMap.unlock();
+            }
+        }
+        throw new RuntimeException("try lock failed.");
+    }
+
+    @Override
+    public Flowable<OrderResponse> reqAutoOpenOrders(boolean bAutoBind) {
+        if (FlowableEmitterMap.tryLock()) {
+            try {
+                return Flowable.<OrderResponse>create(
+                        emitter -> {
+                            flowableEmitterMap.addOrderEmitters(emitter);
+                            ApiDemo.getClient().reqAutoOpenOrders(bAutoBind);
                         },
                         BackpressureStrategy.BUFFER).cache();
             } finally {

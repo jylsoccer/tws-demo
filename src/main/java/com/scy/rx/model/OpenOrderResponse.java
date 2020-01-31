@@ -6,8 +6,7 @@ import com.ib.client.OrderState;
 import lombok.Data;
 
 @Data
-public class OpenOrderResponse {
-    private int orderId;
+public class OpenOrderResponse extends OrderResponse {
     private Contract contract;
     private Order order;
     private OrderState orderState;

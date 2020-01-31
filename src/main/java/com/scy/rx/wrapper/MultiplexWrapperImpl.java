@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_ALL_OPEN_ORDERS;
 import static com.scy.rx.wrapper.FlowableEmitterMap.KEY_REQ_POSITIONS;
 import static com.scy.rx.wrapper.FutureMap.KEY_MANAGED_ACCOUNTS;
 import static com.scy.rx.wrapper.FutureMap.KEY_REQID;
@@ -137,10 +136,11 @@ public class MultiplexWrapperImpl implements EWrapper {
 		log.info("OpenOrder. ID: "+orderId+", "+contract.symbol()+", "+contract.secType()+" @ "+contract.exchange()+": "+
 			order.action()+", "+order.orderType()+" "+order.totalQuantity()+", "+orderState.status());
 		OpenOrderResponse response = new OpenOrderResponse(orderId, contract, order, orderState);
-		FlowableEmitter<OpenOrderResponse> emitter = flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS);
-		if (emitter != null) {
-			emitter.onNext(response);
-			return;
+		for (FlowableEmitter<OrderResponse> emitter : flowableEmitterMap.getOrderEmitters()) {
+			if (emitter != null) {
+				emitter.onNext(response);
+				return;
+			}
 		}
 		log.warn("openOrder, no registered listener. orderId:{}", orderId);
 	}
@@ -150,11 +150,11 @@ public class MultiplexWrapperImpl implements EWrapper {
 	@Override
 	public void openOrderEnd() {
 		System.out.println("OpenOrderEnd");
-		FlowableEmitter<OpenOrderResponse> emitter = flowableEmitterMap.get(KEY_REQ_ALL_OPEN_ORDERS);
-		if (emitter != null) {
-			emitter.onComplete();
-			flowableEmitterMap.remove(KEY_REQ_ALL_OPEN_ORDERS);
-			log.info("openOrderEnd, KEY_REQ_ALL_OPEN_ORDERS removed.");
+		for (FlowableEmitter<OrderResponse> emitter : flowableEmitterMap.getOrderEmitters()) {
+			if (emitter != null) {
+				emitter.onComplete();
+				log.info("openOrderEnd, KEY_REQ_ALL_OPEN_ORDERS removed.");
+			}
 		}
 	}
 
