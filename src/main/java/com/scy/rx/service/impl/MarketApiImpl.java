@@ -9,7 +9,9 @@ import com.scy.rx.service.MarketApi;
 import com.scy.rx.wrapper.FlowableEmitterMap;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MarketApiImpl implements MarketApi {
 
     private FlowableEmitterMap flowableEmitterMap = FlowableEmitterMap.INSTANCE;
@@ -44,6 +46,7 @@ public class MarketApiImpl implements MarketApi {
                 }
                 return Flowable.<TickResponse>create(emitter -> {
                             flowableEmitterMap.put(request.getTickerId(), emitter);
+                            log.debug("reqMktData put reqId:{}", request.getTickerId());
                             ApiDemo.getClient().reqMktData(request.getTickerId(), request.getContract(), request.getGenericTickList(),
                                     request.isSnapshot(), request.getMktDataOptions());
                         },

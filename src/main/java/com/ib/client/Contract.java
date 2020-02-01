@@ -222,7 +222,7 @@ public class Contract implements Cloneable {
                 app( sb, m_right);
             }
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     private static void app(StringBuilder buf, Object obj) {

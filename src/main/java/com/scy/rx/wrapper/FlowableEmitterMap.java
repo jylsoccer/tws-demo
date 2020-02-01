@@ -65,6 +65,7 @@ public class FlowableEmitterMap {
     }
 
     public FlowableEmitter put(Integer key, FlowableEmitter emitter) {
+        log.debug("flowableEmitterMap put:{}", key);
         return flowableEmitterMap.putIfAbsent(key, emitter);
     }
 
@@ -73,6 +74,7 @@ public class FlowableEmitterMap {
     }
 
     public FlowableEmitter remove(Integer key) {
+        log.debug("flowableEmitterMap remove:{}", key);
         return flowableEmitterMap.remove(key);
     }
 

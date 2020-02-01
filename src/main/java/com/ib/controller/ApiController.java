@@ -555,6 +555,7 @@ public class ApiController implements EWrapper {
 				.subscribe(
 						tickResponse -> {
 							if (tickResponse instanceof TickPriceResponse) {
+								log.debug("tickResponse: {}", JSON.toJSONString(tickResponse));
 								TickPriceResponse tickPriceResponse = (TickPriceResponse) tickResponse;
 								handler.tickPrice( TickType.get(tickPriceResponse.getField()), tickPriceResponse.getPrice(), tickPriceResponse.getCanAutoExecute());
 							} else if (tickResponse instanceof TickSizeResponse) {
@@ -639,6 +640,7 @@ public class ApiController implements EWrapper {
 		TickPriceResponse response = new TickPriceResponse(tickerId, field, price, canAutoExecute);
 		FlowableEmitter<TickPriceResponse> emitter = flowableEmitterMap.get(tickerId);
 		if (emitter != null) {
+			log.debug("Tick Price emitter. Ticker Id:"+tickerId);
 			emitter.onNext(response);
 			recEOM();
 			return;
@@ -689,7 +691,7 @@ public class ApiController implements EWrapper {
 	}
 
 	@Override public void marketDataType(int reqId, int marketDataType) {
-		log.debug("marketDataType. reqId: {}", reqId);
+		log.debug("marketDataType. reqId: {}, marketDataType:{}", reqId, marketDataType);
 		ITopMktDataHandler handler = m_topMktDataMap.get( reqId);
 		if (handler != null) {
 			handler.marketDataType( MktDataType.get( marketDataType) );
