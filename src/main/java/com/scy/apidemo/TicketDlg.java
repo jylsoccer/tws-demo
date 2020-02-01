@@ -139,7 +139,6 @@ public class TicketDlg extends JDialog {
 
 		ApiDemo.INSTANCE.controller().placeOrModifyOrder( m_contract, m_order, new IOrderHandler() {
 			@Override public void orderState(OrderState orderState) {
-				ApiDemo.INSTANCE.controller().removeOrderHandler( this);
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
 						dispose();

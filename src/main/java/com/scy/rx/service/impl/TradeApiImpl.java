@@ -41,13 +41,13 @@ public class TradeApiImpl implements TradeApi {
     }
 
     @Override
-    public CompletableFuture<OrderStatusResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
+    public CompletableFuture<OpenOrderResponse> placeOrder(PlaceOrderRequest placeOrderRequest) {
         if (FutureMap.tryLock()) {
             try {
                 if (futureMap.get(placeOrderRequest.getReqId()) != null) {
                     throw new RuntimeException("placeOrder is not available.");
                 }
-                CompletableFuture<OrderStatusResponse> future = new CompletableFuture<>();
+                CompletableFuture<OpenOrderResponse> future = new CompletableFuture<>();
                 futureMap.put(placeOrderRequest.getReqId(), future);
                 ApiDemo.getClient().placeOrder(placeOrderRequest.getReqId(), placeOrderRequest.getContract(), placeOrderRequest.getOrder());
                 return future;

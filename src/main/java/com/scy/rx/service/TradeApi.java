@@ -15,7 +15,7 @@ public interface TradeApi {
 	/**
 	 * 下单
 	 */
-	CompletableFuture<OrderStatusResponse> placeOrder(PlaceOrderRequest placeOrderRequest);
+	CompletableFuture<OpenOrderResponse> placeOrder(PlaceOrderRequest placeOrderRequest);
 
 	/**
 	 * 撤销订单

@@ -4,7 +4,8 @@ package com.scy.rx.service;
 import com.alibaba.fastjson.JSON;
 import com.ib.client.ExecutionFilter;
 import com.scy.rx.model.ExecDetailsRequest;
-import com.scy.rx.model.OrderStatusResponse;
+import com.scy.rx.model.OpenOrderResponse;
+import com.scy.rx.model.OrderResponse;
 import com.scy.rx.model.PlaceOrderRequest;
 import com.scy.rx.service.impl.TradeApiImpl;
 import io.reactivex.schedulers.Schedulers;
@@ -33,7 +34,7 @@ public class TradeApiServiceTest {
 
     @Test
     public void test_placeOrder() throws Exception {
-        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
+        CompletableFuture<OpenOrderResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 2, 50)));
         future.thenAccept(
                 response -> log.info("OpenOrderResponse:{}", response)
         );
@@ -43,7 +44,7 @@ public class TradeApiServiceTest {
     @Test
     public void test_cancelOrder() throws Exception {
         // 下单
-        CompletableFuture<OrderStatusResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 4, 50)));
+        CompletableFuture<OpenOrderResponse> future = tradeApi.placeOrder(new PlaceOrderRequest(tradeApi.reqId(), ContractSamples.USStock(), OrderSamples.LimitOrder("SELL", 4, 50)));
         future.thenAccept(
                 placeOrderResp -> {
                     log.info("placeOrderResp:{}", placeOrderResp);

@@ -59,7 +59,6 @@ public class ApiController implements EWrapper {
 	private final HashMap<Integer, IOrderHandler> m_orderHandlers = new HashMap<Integer, IOrderHandler>();
 	private final HashMap<Integer,IAccountSummaryHandler> m_acctSummaryHandlers = new HashMap<Integer,IAccountSummaryHandler>();
 	private final HashMap<Integer,IMarketValueSummaryHandler> m_mktValSummaryHandlers = new HashMap<Integer,IMarketValueSummaryHandler>();
-	private final ConcurrentHashSet<ILiveOrderHandler> m_liveOrderHandlers = new ConcurrentHashSet<ILiveOrderHandler>();
 	private final HashMap<Integer, IPositionMultiHandler> m_positionMultiMap = new HashMap<Integer, IPositionMultiHandler>();
 	private final HashMap<Integer, IAccountUpdateMultiHandler> m_accountUpdateMultiMap = new HashMap<Integer, IAccountUpdateMultiHandler>();
 	private final HashMap<Integer, ISecDefOptParamsReqHandler> m_secDefOptParamsReqMap = new HashMap<Integer, ISecDefOptParamsReqHandler>();
@@ -898,15 +897,16 @@ public class ApiController implements EWrapper {
 		if (!checkConnection())
 			return;
 
-		// when placing new order, assign new order id
 		if (order.orderId() == 0) {
 			order.orderId( m_orderId++);
-			if (handler != null) {
-				m_orderHandlers.put( order.orderId(), handler);
-			}
 		}
-// TODO: 2020/1/30  
-		m_client.placeOrder( contract, order);
+		tradeApi.placeOrder(new PlaceOrderRequest(order.orderId(), contract, order))
+				.thenAccept(response -> {
+					if (handler != null) {
+						OpenOrderResponse openOrderResponse = (OpenOrderResponse) response;
+						handler.orderState(openOrderResponse.getOrderState());
+					}
+				});
 		sendEOM();
 	}
 
@@ -914,14 +914,14 @@ public class ApiController implements EWrapper {
 		if (!checkConnection())
 			return;
 
-		m_client.cancelOrder( orderId);
+		tradeApi.cancelOrder( orderId);
 		sendEOM();
 	}
 
 	public void cancelAllOrders() {
 		if (!checkConnection())
 			return;
-		
+
 		m_client.reqGlobalCancel();
 		sendEOM();
 	}
@@ -932,10 +932,6 @@ public class ApiController implements EWrapper {
 
 		m_client.exerciseOptions( m_reqId++, contract, type.ordinal(), quantity, account, override ? 1 : 0);
 		sendEOM();
-	}
-
-	public void removeOrderHandler( IOrderHandler handler) {
-		getAndRemoveKey(m_orderHandlers, handler);
 	}
 
 
@@ -1039,9 +1035,10 @@ public class ApiController implements EWrapper {
 
 	@Override public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
 		log.debug("openOrder. orderId:{}", orderId);
-		IOrderHandler handler = m_orderHandlers.get( orderId);
-		if (handler != null) {
-			handler.orderState(orderState);
+		OpenOrderResponse openOrderResponse = new OpenOrderResponse(orderId, contract, order, orderState);
+		CompletableFuture<OrderResponse> future = futureMap.remove(orderId);
+		if (future != null) {
+			future.complete(openOrderResponse);
 		}
 
 		if (!order.whatIf() ) {
@@ -1068,12 +1065,13 @@ public class ApiController implements EWrapper {
 
 	@Override public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
 		log.debug("orderStatus. orderId:{}", orderId);
-		IOrderHandler handler = m_orderHandlers.get( orderId);
-		if (handler != null) {
-			handler.orderStatus( OrderStatus.valueOf( status), filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
-		}
 
 		OrderStatusResponse response = new OrderStatusResponse(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
+		CompletableFuture<OrderResponse> future = futureMap.remove(orderId);
+		if (future != null) { // for cancelOrder request
+			future.complete(response);
+		}
+
 		for (FlowableEmitter<OrderResponse> emitter : flowableEmitterMap.getOrderEmitters()) {
 			if (emitter != null) {
 				emitter.onNext(response);
