@@ -10,8 +10,8 @@ public interface IConnectionConfiguration {
 
 	/** Standard ApiDemo configuration for pre-v100 connection */
 	public static class DefaultConnectionConfiguration implements IConnectionConfiguration {
-	    @Override public String getDefaultHost() { return "127.0.0.1"; }
-	    @Override public String getDefaultPort() { return "7497"; }
+	    @Override public String getDefaultHost() { return ""; }
+	    @Override public String getDefaultPort() { return ""; }
 	    @Override public String getDefaultConnectOptions() { return null; }
 	}
 }
