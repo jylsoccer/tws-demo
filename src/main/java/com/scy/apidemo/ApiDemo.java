@@ -89,15 +89,15 @@ public class ApiDemo implements IConnectionHandler {
 	}
 
 	private void run() {
-		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
-		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);
-		m_tabbedPanel.addTab( "Trading", m_tradingPanel);
-		m_tabbedPanel.addTab( "Account Info", m_acctInfoPanel);
-		m_tabbedPanel.addTab( "Acct/Pos Multi", m_acctPosMultiPanel);
-		m_tabbedPanel.addTab( "Options", m_optionsPanel);
-		m_tabbedPanel.addTab( "Combos", m_comboPanel);
-		m_tabbedPanel.addTab( "Contract Info", m_contractInfoPanel);
-		m_tabbedPanel.addTab( "Advisor", m_advisorPanel);
+//		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
+//		m_tabbedPanel.addTab( "行情", m_mktDataPanel);// TODO: 2020/2/27 行情
+//		m_tabbedPanel.addTab( "交易", m_tradingPanel);// TODO: 2020/2/27 下单
+//		m_tabbedPanel.addTab( "账户信息", m_acctInfoPanel);// TODO: 2020/2/27 账户信息
+//		m_tabbedPanel.addTab( "Acct/Pos Multi", m_acctPosMultiPanel);
+//		m_tabbedPanel.addTab( "Options", m_optionsPanel);
+//		m_tabbedPanel.addTab( "Combos", m_comboPanel);
+//		m_tabbedPanel.addTab( "Contract Info", m_contractInfoPanel);
+//		m_tabbedPanel.addTab( "Advisor", m_advisorPanel);
 		// m_tabbedPanel.addTab( "Strategy", m_stratPanel); in progress
 			
 		m_msg.setEditable( false);
@@ -115,10 +115,19 @@ public class ApiDemo implements IConnectionHandler {
 		bot.addTab( "Messages", msgScroll);
 		bot.addTab( "Log (out)", outLogScroll);
 		bot.addTab( "Log (in)", inLogScroll);
-		
-        m_frame.add( m_tabbedPanel);
-        m_frame.add( bot, BorderLayout.SOUTH);
-        m_frame.setSize( 1024, 768);
+
+		m_frame.setSize( 1024, 768);
+
+		m_mktDataPanel.setPreferredSize(new Dimension( m_frame.getWidth(), 120) );
+		m_tradingPanel.setPreferredSize(new Dimension( m_frame.getWidth(), 220) );
+		m_acctInfoPanel.setPreferredSize(new Dimension( m_frame.getWidth(), 428) );
+
+		VerticalPanel verticalPanel = new VerticalPanel();
+		verticalPanel.add( m_mktDataPanel);
+		verticalPanel.add( m_tradingPanel);
+		verticalPanel.add( m_acctInfoPanel);
+//		verticalPanel.add( bot);
+		m_frame.add(verticalPanel);
         m_frame.setVisible( true);
         m_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
         
