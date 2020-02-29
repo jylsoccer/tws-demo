@@ -41,6 +41,7 @@ public class NewMarketDataPanel extends JPanel {
 		setLayout( new BorderLayout() );
 		add( p, BorderLayout.NORTH);
 		add( scroll);
+		setPreferredSize(new Dimension(1000, 200));
 	}
 
 	public static void main(String[] args) {
@@ -48,7 +49,7 @@ public class NewMarketDataPanel extends JPanel {
 
 		JFrame f = new JFrame();
 		f.add( p);
-		f.setSize( 1000, 500);
+		f.pack();
 		f.setVisible( true);
 		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
 	}

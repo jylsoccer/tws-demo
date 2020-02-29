@@ -14,6 +14,7 @@ import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -23,7 +24,7 @@ public class NewOrdersPanel extends JPanel {
 
 	NewOrdersPanel() {
 		JScrollPane scroll = new JScrollPane( m_table);
-		scroll.setBorder( new TitledBorder( "Live Orders"));
+		scroll.setBorder( new TitledBorder( "未成交订单"));
 		
 		m_table.addMouseListener( new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
@@ -41,12 +42,11 @@ public class NewOrdersPanel extends JPanel {
 		butsPanel.add(cancelBut);
 		butsPanel.add(cancelAllBut);
 
-
-
 		setLayout( new BorderLayout() );
 		add( new SubmitOrderPanel(), BorderLayout.WEST);
 		add( scroll);
 		add( butsPanel, BorderLayout.EAST);
+		setPreferredSize(new Dimension(1000, 380));
 	}
 
 	protected void onDoubleClick() {
@@ -232,7 +232,7 @@ public class NewOrdersPanel extends JPanel {
 
 		JFrame f = new JFrame();
 		f.add( p);
-		f.setSize( 1000, 400);
+		f.pack();
 		f.setVisible( true);
 		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
 	}

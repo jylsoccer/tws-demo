@@ -3,23 +3,29 @@
 
 package com.scy.apidemo;
 
-import com.scy.apidemo.util.VerticalPanel;
-
 import javax.swing.*;
+import java.awt.*;
 
-public class NewAccountsAndTradesPanel extends VerticalPanel.HorzPanel {
+public class NewAccountsAndTradesPanel extends JPanel {
 
 	NewAccountsAndTradesPanel() {
 		NewAccountInfoPanel accountInfoPanel = new NewAccountInfoPanel();
 		NewTradesPanel tradesPanel = new NewTradesPanel();
 
-		add(accountInfoPanel);
-		add(tradesPanel);
+		JSplitPane vSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, accountInfoPanel, tradesPanel);
+
+		add(vSplitPane);
+//		setPreferredSize(new Dimension(1000, 200));
 	}
 
 	public static void main(String[] args) {
+		JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new NewMarketDataPanel(), new NewOrdersPanel());
+		vSplitPane.setDividerLocation(200);
+		JSplitPane vSplitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, vSplitPane, new NewAccountsAndTradesPanel());
+		vSplitPane2.setDividerLocation(580);
+
 		JFrame f = new JFrame();
-		f.add(new NewAccountsAndTradesPanel());
+		f.add(vSplitPane2);
 
 		f.pack();
 		f.setVisible( true);
