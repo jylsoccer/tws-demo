@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import static com.ib.controller.Formats.fmt0;
+import static javax.swing.JTable.AUTO_RESIZE_OFF;
 
 public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHandler {
 	private DefaultListModel m_acctList = new DefaultListModel();
@@ -42,9 +43,9 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 		acctScroll.setBorder( new TitledBorder( "Select Account"));
 
 		JScrollPane marginScroll = new JScrollPane( m_marginTable);
-		m_mktValTable.setPreferredScrollableViewportSize(new Dimension( 10000, 100));
+		m_mktValTable.setAutoResizeMode(AUTO_RESIZE_OFF);
 		JScrollPane mvScroll = new JScrollPane( m_mktValTable);
-		m_portfolioTable.setPreferredSize(new Dimension( 10000, 100));
+		m_portfolioTable.setAutoResizeMode(AUTO_RESIZE_OFF);
 		JScrollPane portScroll = new JScrollPane( m_portfolioTable);
 		
 		NewTabbedPanel tabbedPanel = new NewTabbedPanel();

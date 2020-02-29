@@ -18,18 +18,20 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static javax.swing.JTable.AUTO_RESIZE_OFF;
+
 @Slf4j
 public class AccountSummaryPanel extends NewTabPanel {
 	private SummaryModel m_model = new SummaryModel();
 
 	AccountSummaryPanel() {
-		HtmlButton sub = new HtmlButton( "Subscribe") {
+		HtmlButton sub = new HtmlButton( "订阅") {
 			protected void actionPerformed() {
 				subscribe();
 			}
 		};
 		
-		HtmlButton desub = new HtmlButton( "Desubscribe") {
+		HtmlButton desub = new HtmlButton( "取消订阅") {
 			protected void actionPerformed() {
 				desubscribe();
 			}
@@ -41,7 +43,7 @@ public class AccountSummaryPanel extends NewTabPanel {
 		
 		JTable table = new Table( m_model);
 		JScrollPane scroll = new JScrollPane( table);
-		
+		table.setAutoResizeMode(AUTO_RESIZE_OFF);
 		setLayout( new BorderLayout() );
 		add( scroll);
 		add( buts, BorderLayout.EAST);
