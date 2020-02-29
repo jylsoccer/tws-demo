@@ -65,11 +65,10 @@ public class SubmitOrderPanel extends VerticalPanel {
 		butsPanel.add(submitBut);
 		butsPanel.add(resetBut);
 
-		butsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
+		butsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
 
 		add(submitPanel);
 		add(butsPanel);
-
 	}
 
 	private void onOK() {

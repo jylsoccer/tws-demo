@@ -65,15 +65,15 @@ class TopModel extends AbstractTableModel {
 	
 	@Override public String getColumnName(int col) {
 		switch( col) {
-			case 0: return "Description";
-			case 1: return "Bid Size";
-			case 2: return "Bid";
-			case 3: return "Ask";
-			case 4: return "Ask Size";
-			case 5: return "Last";
-			case 6: return "Time";
-			case 7: return "Change";
-			case 8: return "Volume";
+			case 0: return "合约";
+			case 1: return "买量";
+			case 2: return "买价";
+			case 3: return "卖价";
+			case 4: return "卖量";
+			case 5: return "最新价";
+			case 6: return "时间";
+			case 7: return "涨跌";
+			case 8: return "成交量";
 			default: return null;
 		}
 	}

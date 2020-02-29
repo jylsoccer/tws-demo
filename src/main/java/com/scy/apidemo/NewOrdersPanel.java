@@ -9,6 +9,7 @@ import com.scy.apidemo.util.HtmlButton;
 import com.scy.apidemo.util.VerticalPanel;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
@@ -38,7 +39,9 @@ public class NewOrdersPanel extends JPanel {
 		JButton cancelBut = new JButton( "撤单");
 		JButton cancelAllBut = new JButton( "全撤");
 
-		VerticalPanel butsPanel = new VerticalPanel();
+		JPanel butsPanel = new JPanel();
+		butsPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		butsPanel.setLayout(new GridLayout(2,1,5,5));
 		butsPanel.add(cancelBut);
 		butsPanel.add(cancelAllBut);
 
@@ -46,7 +49,7 @@ public class NewOrdersPanel extends JPanel {
 		add( new SubmitOrderPanel(), BorderLayout.WEST);
 		add( scroll);
 		add( butsPanel, BorderLayout.EAST);
-		setPreferredSize(new Dimension(1000, 380));
+		setPreferredSize(new Dimension(1000, 300));
 	}
 
 	protected void onDoubleClick() {

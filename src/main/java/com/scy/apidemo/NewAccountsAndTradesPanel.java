@@ -15,10 +15,11 @@ public class NewAccountsAndTradesPanel extends JPanel {
 		JSplitPane vSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, accountInfoPanel, tradesPanel);
 
 		add(vSplitPane);
-//		setPreferredSize(new Dimension(1000, 200));
+		setPreferredSize(new Dimension(1000, 200));
 	}
 
 	public static void main(String[] args) {
+		NewMarketDataPanel marketDataPanel = new NewMarketDataPanel();
 		JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new NewMarketDataPanel(), new NewOrdersPanel());
 		vSplitPane.setDividerLocation(200);
 		JSplitPane vSplitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, vSplitPane, new NewAccountsAndTradesPanel());

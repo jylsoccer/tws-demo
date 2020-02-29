@@ -3,7 +3,9 @@
 
 package com.scy.apidemo;
 
+import com.ib.client.Contract;
 import com.scy.apidemo.util.HtmlButton;
+import com.scy.apidemo.util.SelectedContractsConf;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -34,6 +36,7 @@ public class NewMarketDataPanel extends JPanel {
 
 		// 行情列表
 		JTable table = new JTable( m_model);
+		table.setPreferredSize(new Dimension(700, 200));
 		JScrollPane scroll = new JScrollPane( table);
 		scroll.setBorder( new TitledBorder( "行情"));
 
@@ -42,6 +45,12 @@ public class NewMarketDataPanel extends JPanel {
 		add( p, BorderLayout.NORTH);
 		add( scroll);
 		setPreferredSize(new Dimension(1000, 200));
+	}
+
+	public void initSelected() {
+		for (Contract contract : SelectedContractsConf.getContracts(this.getClass().getClassLoader().getResource("selectedContracts.json").getPath())) {
+			m_model.addRow(contract);
+		}
 	}
 
 	public static void main(String[] args) {

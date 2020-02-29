@@ -36,7 +36,11 @@ public class ApiDemo implements IConnectionHandler {
 	private final JFrame m_frame = new JFrame();
 	private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel(true);
 	private final ConnectionPanel m_connectionPanel;
-	private final MarketDataPanel m_mktDataPanel = new MarketDataPanel();
+
+	private final NewMarketDataPanel marketDataPanel = new NewMarketDataPanel();
+	private final NewOrdersPanel ordersPanel = new NewOrdersPanel();
+	private final NewAccountsAndTradesPanel accountsAndTradesPanel = new NewAccountsAndTradesPanel();
+
 	private final ContractInfoPanel m_contractInfoPanel = new ContractInfoPanel();
 	private final TradingPanel m_tradingPanel = new TradingPanel();
 	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
@@ -79,40 +83,54 @@ public class ApiDemo implements IConnectionHandler {
 	}
 
 	private void run() {
-		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
-		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);
-		m_tabbedPanel.addTab( "Trading", m_tradingPanel);
-		m_tabbedPanel.addTab( "Account Info", m_acctInfoPanel);
-		m_tabbedPanel.addTab( "Acct/Pos Multi", m_acctPosMultiPanel);
-		m_tabbedPanel.addTab( "Options", m_optionsPanel);
-		m_tabbedPanel.addTab( "Combos", m_comboPanel);
-		m_tabbedPanel.addTab( "Contract Info", m_contractInfoPanel);
-		m_tabbedPanel.addTab( "Advisor", m_advisorPanel);
-		// m_tabbedPanel.addTab( "Strategy", m_stratPanel); in progress
-			
-		m_msg.setEditable( false);
-		m_msg.setLineWrap( true);
-		JScrollPane msgScroll = new JScrollPane( m_msg);
-		msgScroll.setPreferredSize( new Dimension( 10000, 120) );
+//		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
+//		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);
+//		m_tabbedPanel.addTab( "Trading", m_tradingPanel);
+//		m_tabbedPanel.addTab( "Account Info", m_acctInfoPanel);
+//		m_tabbedPanel.addTab( "Acct/Pos Multi", m_acctPosMultiPanel);
+//		m_tabbedPanel.addTab( "Options", m_optionsPanel);
+//		m_tabbedPanel.addTab( "Combos", m_comboPanel);
+//		m_tabbedPanel.addTab( "Contract Info", m_contractInfoPanel);
+//		m_tabbedPanel.addTab( "Advisor", m_advisorPanel);
+//		// m_tabbedPanel.addTab( "Strategy", m_stratPanel); in progress
+//
+//		m_msg.setEditable( false);
+//		m_msg.setLineWrap( true);
+//		JScrollPane msgScroll = new JScrollPane( m_msg);
+//		msgScroll.setPreferredSize( new Dimension( 10000, 120) );
+//
+//		JScrollPane outLogScroll = new JScrollPane( m_outLog);
+//		outLogScroll.setPreferredSize( new Dimension( 10000, 120) );
+//
+//		JScrollPane inLogScroll = new JScrollPane( m_inLog);
+//		inLogScroll.setPreferredSize( new Dimension( 10000, 120) );
+//
+//		NewTabbedPanel bot = new NewTabbedPanel();
+//		bot.addTab( "Messages", msgScroll);
+//		bot.addTab( "Log (out)", outLogScroll);
+//		bot.addTab( "Log (in)", inLogScroll);
+//
+//        m_frame.add( m_tabbedPanel);
+//        m_frame.add( bot, BorderLayout.SOUTH);
+//        m_frame.setSize( 1024, 768);
+//        m_frame.setVisible( true);
+//        m_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
 
-		JScrollPane outLogScroll = new JScrollPane( m_outLog);
-		outLogScroll.setPreferredSize( new Dimension( 10000, 120) );
 
-		JScrollPane inLogScroll = new JScrollPane( m_inLog);
-		inLogScroll.setPreferredSize( new Dimension( 10000, 120) );
 
-		NewTabbedPanel bot = new NewTabbedPanel();
-		bot.addTab( "Messages", msgScroll);
-		bot.addTab( "Log (out)", outLogScroll);
-		bot.addTab( "Log (in)", inLogScroll);
-		
-        m_frame.add( m_tabbedPanel);
-        m_frame.add( bot, BorderLayout.SOUTH);
-        m_frame.setSize( 1024, 768);
-        m_frame.setVisible( true);
-        m_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
-        
-        // make initial connection to local host, port 7496, client id 0, no connection options
+		JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, marketDataPanel, ordersPanel);
+		vSplitPane.setDividerLocation(200);
+		JSplitPane vSplitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, vSplitPane, accountsAndTradesPanel);
+		vSplitPane2.setDividerLocation(500);
+
+		JFrame f = new JFrame();
+		f.add(vSplitPane2);
+
+		f.pack();
+		f.setVisible( true);
+		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
+
+		// make initial connection to local host, port 7496, client id 0, no connection options
 		controller().connect( "127.0.0.1", 7497, 0, m_connectionConfiguration.getDefaultConnectOptions() != null ? "" : null );
     }
 	
@@ -134,7 +152,7 @@ public class ApiDemo implements IConnectionHandler {
 			}
 		});
 		// 连接成功后，订阅收藏行情
-		m_mktDataPanel.initSelected();
+		marketDataPanel.initSelected();
 	}
 	
 	@Override public void disconnected() {
