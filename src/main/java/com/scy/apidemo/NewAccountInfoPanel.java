@@ -67,6 +67,7 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 				onChanged();
 			}
 		});
+		setPreferredSize(new Dimension(500, 200));
 	}
 	
 	/** Called when the tab is first visited. */
