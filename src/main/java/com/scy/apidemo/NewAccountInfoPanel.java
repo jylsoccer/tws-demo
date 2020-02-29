@@ -38,9 +38,10 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 	NewAccountInfoPanel() {
 		m_lastUpdated.setHorizontalAlignment( SwingConstants.RIGHT);
 
-		m_accounts.setPreferredSize( new Dimension( 10000, 100) );
+		m_accounts.setPreferredSize( new Dimension( 10000, 10) );
 		JScrollPane acctScroll = new JScrollPane( m_accounts);
 		acctScroll.setBorder( new TitledBorder( "Select Account"));
+		acctScroll.setPreferredSize(new Dimension( 1000, 50));
 
 		JScrollPane marginScroll = new JScrollPane( m_marginTable);
 		m_mktValTable.setAutoResizeMode(AUTO_RESIZE_OFF);
@@ -59,6 +60,8 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 		setLayout( new BorderLayout() );
 		add( acctScroll, BorderLayout.NORTH);
 		add( tabbedPanel);
+		add( m_lastUpdated, BorderLayout.SOUTH);
+
 		m_accounts.addListSelectionListener( new ListSelectionListener() {
 			@Override public void valueChanged(ListSelectionEvent e) {
 				onChanged();
@@ -430,7 +433,7 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 
 		JFrame f = new JFrame();
 		f.add( p);
-		f.setSize( 500, 500);
+		f.setSize( 500, 300);
 		f.setVisible( true);
 		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
 	}
