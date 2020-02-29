@@ -5,17 +5,13 @@ package com.scy.apidemo;
 
 import com.ib.client.*;
 import com.ib.controller.ApiController.ILiveOrderHandler;
-import com.scy.apidemo.util.HtmlButton;
-import com.scy.apidemo.util.VerticalPanel;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -46,7 +42,7 @@ public class NewOrdersPanel extends JPanel {
 		butsPanel.add(cancelAllBut);
 
 		setLayout( new BorderLayout() );
-		add( new SubmitOrderPanel(), BorderLayout.WEST);
+		add( new NewSubmitOrderPanel(), BorderLayout.WEST);
 		add( scroll);
 		add( butsPanel, BorderLayout.EAST);
 		setPreferredSize(new Dimension(1000, 300));
@@ -228,15 +224,5 @@ public class NewOrdersPanel extends JPanel {
 			m_clientId = clientId;
 			m_orderId = orderId;
 		}
-	}
-
-	public static void main(String[] args) {
-		NewOrdersPanel p = new NewOrdersPanel();
-
-		JFrame f = new JFrame();
-		f.add( p);
-		f.pack();
-		f.setVisible( true);
-		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
 	}
 }

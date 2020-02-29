@@ -121,7 +121,7 @@ public class ApiDemo implements IConnectionHandler {
 		JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, marketDataPanel, ordersPanel);
 		vSplitPane.setDividerLocation(200);
 		JSplitPane vSplitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, vSplitPane, accountsAndTradesPanel);
-		vSplitPane2.setDividerLocation(500);
+		vSplitPane2.setDividerLocation(530);
 
 		JFrame f = new JFrame();
 		f.add(vSplitPane2);
