@@ -86,6 +86,7 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 			}
 		});
 		m_order.orderId(0);
+
 	}
 
 	private void onResetOrder() {

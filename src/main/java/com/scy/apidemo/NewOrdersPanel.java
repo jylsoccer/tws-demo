@@ -52,8 +52,13 @@ public class NewOrdersPanel extends JPanel {
 
 
 		JButton cancelBut = new JButton( "撤单");
+		cancelBut.addActionListener(
+				(e) -> onCancel()
+		);
 		JButton cancelAllBut = new JButton( "全撤");
-
+		cancelAllBut.addActionListener(
+				(e) -> onCancelAll()
+		);
 		JPanel butsPanel = new JPanel();
 		butsPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		butsPanel.setLayout(new GridLayout(2,1,5,5));
