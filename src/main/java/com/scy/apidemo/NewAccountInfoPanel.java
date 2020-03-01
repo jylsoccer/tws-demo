@@ -37,11 +37,10 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 
 	NewAccountInfoPanel() {
 		m_lastUpdated.setHorizontalAlignment( SwingConstants.RIGHT);
-
-		m_accounts.setPreferredSize( new Dimension( 10000, 10) );
+		m_accounts.setPreferredSize( new Dimension( 1000, 80) );
 		JScrollPane acctScroll = new JScrollPane( m_accounts);
 		acctScroll.setBorder( new TitledBorder( "Select Account"));
-		acctScroll.setPreferredSize(new Dimension( 1000, 50));
+		acctScroll.setPreferredSize(new Dimension( 1000, 80));
 
 		JScrollPane marginScroll = new JScrollPane( m_marginTable);
 		m_mktValTable.setAutoResizeMode(AUTO_RESIZE_OFF);
@@ -56,7 +55,7 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 		tabbedPanel.addTab( "帐户汇总", new AccountSummaryPanel() );
 		tabbedPanel.addTab( "市值摘要", new MarketValueSummaryPanel() );
 		tabbedPanel.addTab( "头寸", new PositionsPanel() );
-		
+		tabbedPanel.setPreferredSize(new Dimension(500, 200));
 		setLayout( new BorderLayout() );
 		add( acctScroll, BorderLayout.NORTH);
 		add( tabbedPanel);
@@ -67,7 +66,8 @@ public class NewAccountInfoPanel extends JPanel implements INewTab, IAccountHand
 				onChanged();
 			}
 		});
-		setPreferredSize(new Dimension(500, 200));
+		activated();
+		setPreferredSize(new Dimension(500, 300));
 	}
 	
 	/** Called when the tab is first visited. */

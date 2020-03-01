@@ -11,6 +11,7 @@ import com.scy.apidemo.util.VerticalPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.TimeUnit;
 
 public class NewSubmitOrderPanel extends VerticalPanel {
 
@@ -38,6 +39,11 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 		tabbedPanel.addTab( "合约", m_contractPanel);
 		tabbedPanel.addTab( "订单", m_orderPanel);
 
+		JButton subscribeBut = new JButton( "收藏");
+		subscribeBut.addActionListener(
+				(e) -> onTop()
+		);
+
 		JButton submitBut = new JButton( "下单");
 		submitBut.addActionListener(
 				(e) -> onTransmitOrder()
@@ -49,6 +55,7 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 		);
 
 		JPanel butsPanel = new JPanel();
+		butsPanel.add(subscribeBut);
 		butsPanel.add(submitBut);
 		butsPanel.add(resetBut);
 
@@ -69,6 +76,11 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 		return "";
 	}
 
+	private void onTop() {
+		m_contractPanel.onOK();
+
+		NewMarketDataPanel.m_model.addRow( m_contract);
+	}
 	private void onTransmitOrder() {
 		scrape();
 

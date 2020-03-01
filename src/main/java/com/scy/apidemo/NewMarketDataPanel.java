@@ -13,38 +13,33 @@ import java.awt.*;
 
 public class NewMarketDataPanel extends JPanel {
 
-	final TopModel m_model = new TopModel();
+	public final static TopModel m_model = new TopModel();
+	private JTable table;
 
 	public NewMarketDataPanel() {
-		// header
-		HtmlButton addBut = new HtmlButton( "添加") {
-			@Override public void actionPerformed() {
-				// TODO: 2020/2/29
-			}
-		};
+		JButton delBut = new JButton( "删除收藏");
+		delBut.addActionListener((e) -> {
+			m_model.cancel(getSelectedOrder());
+		});
 
-		HtmlButton delBut = new HtmlButton( "删除") {
-			@Override public void actionPerformed() {
-				// TODO: 2020/2/29
-			}
-		};
-
-		JPanel p = new JPanel( new FlowLayout( FlowLayout.LEADING, 10, 10));
-		p.add( addBut);
+		Box p=Box.createVerticalBox();
+		p.add(Box.createVerticalGlue());
 		p.add( delBut);
+		p.add(Box.createVerticalGlue());
 
 
 		// 行情列表
-		JTable table = new JTable( m_model);
-		table.setPreferredSize(new Dimension(700, 200));
+		table = new JTable( m_model);
+		table.setPreferredSize(new Dimension(700, 180));
 		JScrollPane scroll = new JScrollPane( table);
 		scroll.setBorder( new TitledBorder( "行情"));
+		scroll.setPreferredSize(new Dimension(700, 180));
 
         // 布局
 		setLayout( new BorderLayout() );
-		add( p, BorderLayout.NORTH);
-		add( scroll);
-		setPreferredSize(new Dimension(1000, 200));
+		add( p, BorderLayout.EAST);
+		add( scroll, BorderLayout.CENTER);
+		setPreferredSize(new Dimension(1000, 180));
 	}
 
 	public void initSelected() {
@@ -53,13 +48,7 @@ public class NewMarketDataPanel extends JPanel {
 		}
 	}
 
-	public static void main(String[] args) {
-		NewMarketDataPanel p = new NewMarketDataPanel();
-
-		JFrame f = new JFrame();
-		f.add( p);
-		f.pack();
-		f.setVisible( true);
-		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
+	private int getSelectedOrder() {
+		return table.getSelectedRow();
 	}
 }

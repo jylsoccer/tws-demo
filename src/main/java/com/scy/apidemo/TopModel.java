@@ -101,7 +101,11 @@ class TopModel extends AbstractTableModel {
 	}
 
 	public void cancel(int i) {
-		ApiDemo.INSTANCE.controller().cancelTopMktData( m_rows.get( i) );
+		if (i < 0) {
+			return;
+		}
+		ApiDemo.INSTANCE.controller().cancelTopMktData( m_rows.remove(i) );
+		fireTableDataChanged();
 	}
 	
 	static class TopRow extends TopMktDataAdapter {

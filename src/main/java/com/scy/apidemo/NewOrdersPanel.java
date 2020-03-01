@@ -70,7 +70,7 @@ public class NewOrdersPanel extends JPanel {
 		add(submitOrderPanel, BorderLayout.WEST);
 		add( loPanel);
 		add( butsPanel, BorderLayout.EAST);
-		setPreferredSize(new Dimension(1000, 300));
+		setPreferredSize(new Dimension(1000, 280));
 	}
 
 	protected void onDoubleClick() {

@@ -36,14 +36,15 @@ public class NewTradesPanel extends JPanel implements ITradeReportHandler {
 				onRefresh();
 			}
 		};
+		scroll.setPreferredSize(new Dimension(500, 260));
 
 		JPanel p = new JPanel( new FlowLayout( FlowLayout.RIGHT));
 		p.add( but);
-		
+		p.setPreferredSize(new Dimension(500, 20));
 		setLayout( new BorderLayout() );
-		add( scroll);
+		add( scroll, BorderLayout.CENTER);
 		add( p, BorderLayout.SOUTH);
-		setPreferredSize(new Dimension(500, 200));
+		setPreferredSize(new Dimension(500, 280));
 
 	}
 

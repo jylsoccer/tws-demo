@@ -16,11 +16,13 @@ import com.ib.controller.ApiController.IConnectionHandler;
 import com.ib.controller.ApiController.ITimeHandler;
 import com.ib.controller.Formats;
 import com.scy.apidemo.util.*;
+import lombok.SneakyThrows;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class ApiDemo implements IConnectionHandler {
 	static { NewLookAndFeel.register(); }
@@ -125,9 +127,9 @@ public class ApiDemo implements IConnectionHandler {
 		accountsAndTradesPanel = new NewAccountsAndTradesPanel();
 
 		JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, marketDataPanel, ordersPanel);
-		vSplitPane.setDividerLocation(200);
+		vSplitPane.setDividerLocation(140);
 		JSplitPane vSplitPane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, vSplitPane, accountsAndTradesPanel);
-		vSplitPane2.setDividerLocation(530);
+		vSplitPane2.setDividerLocation(465);
 
 		JFrame f = new JFrame();
 		f.add(vSplitPane2);
@@ -135,7 +137,7 @@ public class ApiDemo implements IConnectionHandler {
 		f.pack();
 		f.setVisible( true);
 		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
-
+		marketDataPanel.initSelected();
     }
 
 	private void showConnectFrame(){
@@ -143,6 +145,7 @@ public class ApiDemo implements IConnectionHandler {
 		m_conn_frame.setVisible( true);
 		m_conn_frame.setBounds(500, 300 , 350, 200);
 		m_conn_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
+		controller().connect( "127.0.0.1", 7497, 0, "");
 	}
 
 
@@ -163,8 +166,6 @@ public class ApiDemo implements IConnectionHandler {
 				show( message);
 			}
 		});
-		// 连接成功后，订阅收藏行情
-		marketDataPanel.initSelected();
 	}
 	
 	@Override public void disconnected() {
@@ -199,8 +200,8 @@ public class ApiDemo implements IConnectionHandler {
 	}
 	
     private class ConnectionPanel extends JPanel {
-		private final JTextField m_host = new JTextField( m_connectionConfiguration.getDefaultHost(), 10);
-		private final JTextField m_port = new JTextField( m_connectionConfiguration.getDefaultPort(), 7);
+		private final JTextField m_host = new JTextField( "", 10);
+		private final JTextField m_port = new JTextField( "", 7);
 		private final JTextField m_connectOptionsTF = new JTextField( m_connectionConfiguration.getDefaultConnectOptions(), 30);
 		private final JTextField m_clientId = new JTextField("0", 7);
 		private final JLabel m_status = new JLabel("Disconnected");
@@ -242,10 +243,8 @@ public class ApiDemo implements IConnectionHandler {
 //			int clientId = Integer.parseInt( m_clientId.getText() );
 //			controller().connect( m_host.getText(), port, clientId, m_connectOptionsTF.getText());
 			// TODO: 2020/2/26 此处修改连接地址
-			controller().connect( "127.0.0.1", 7497, 0, m_connectOptionsTF.getText());
 			m_conn_frame.dispose();
 			INSTANCE.run();
-
 		}
 	}
 	
