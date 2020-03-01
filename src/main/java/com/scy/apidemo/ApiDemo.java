@@ -37,9 +37,11 @@ public class ApiDemo implements IConnectionHandler {
 	private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel(true);
 	private final ConnectionPanel m_connectionPanel;
 
-	private final NewMarketDataPanel marketDataPanel = new NewMarketDataPanel();
-	private final NewOrdersPanel ordersPanel = new NewOrdersPanel();
-	private final NewAccountsAndTradesPanel accountsAndTradesPanel = new NewAccountsAndTradesPanel();
+	private NewMarketDataPanel marketDataPanel;
+	private NewOrdersPanel ordersPanel;
+	private NewAccountsAndTradesPanel accountsAndTradesPanel;
+
+	private final JFrame m_conn_frame = new JFrame();
 
 	private final ContractInfoPanel m_contractInfoPanel = new ContractInfoPanel();
 	private final TradingPanel m_tradingPanel = new TradingPanel();
@@ -63,7 +65,8 @@ public class ApiDemo implements IConnectionHandler {
 	
     public static void start( ApiDemo apiDemo ) {
         INSTANCE = apiDemo;
-        INSTANCE.run();
+		INSTANCE.showConnectFrame();
+//        INSTANCE.run();
     }
 
 	public ApiDemo( IConnectionConfiguration connectionConfig ) {
@@ -117,6 +120,9 @@ public class ApiDemo implements IConnectionHandler {
 //        m_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
 
 
+		marketDataPanel = new NewMarketDataPanel();
+		ordersPanel = new NewOrdersPanel();
+		accountsAndTradesPanel = new NewAccountsAndTradesPanel();
 
 		JSplitPane vSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, marketDataPanel, ordersPanel);
 		vSplitPane.setDividerLocation(200);
@@ -130,10 +136,16 @@ public class ApiDemo implements IConnectionHandler {
 		f.setVisible( true);
 		f.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
 
-		// make initial connection to local host, port 7496, client id 0, no connection options
-		controller().connect( "127.0.0.1", 7497, 0, m_connectionConfiguration.getDefaultConnectOptions() != null ? "" : null );
     }
-	
+
+	private void showConnectFrame(){
+		m_conn_frame.add( m_connectionPanel);
+		m_conn_frame.setVisible( true);
+		m_conn_frame.setBounds(500, 300 , 350, 200);
+		m_conn_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
+	}
+
+
 	@Override public void connected() {
 		show( "connected");
 		m_connectionPanel.m_status.setText( "connected");
@@ -198,49 +210,42 @@ public class ApiDemo implements IConnectionHandler {
 				+ "<b>TWS: 7497; IB Gateway: 4002</b></html>");
 		
 		public ConnectionPanel() {
-			HtmlButton connect = new HtmlButton("Connect") {
-				@Override public void actionPerformed() {
-					onConnect();
-				}
-			};
+			JButton connect = new JButton("登录");
+			connect.addActionListener(e -> onConnect());
 
-			HtmlButton disconnect = new HtmlButton("Disconnect") {
-				@Override public void actionPerformed() {
-					controller().disconnect();
-				}
-			};
-			
+			JButton disconnect = new JButton("退出");
+			disconnect.addActionListener(e -> System.exit(0));
+
 			JPanel p1 = new VerticalPanel();
-			p1.add( "Host", m_host);
-			p1.add( "Port", m_port);
-			p1.add( "Client ID", m_clientId);
-			if ( m_connectionConfiguration.getDefaultConnectOptions() != null ) {
-				p1.add( "Connect options", m_connectOptionsTF);
-			}
-			p1.add( "", m_defaultPortNumberLabel);
-			
-			JPanel p2 = new VerticalPanel();
+			p1.add(Box.createVerticalStrut(8));
+
+			p1.add( "  用户名", m_host);
+			p1.add(Box.createVerticalStrut(6));
+			p1.add( "  密码", m_port);
+
+			JPanel p2 = new JPanel(new FlowLayout());
 			p2.add( connect);
 			p2.add( disconnect);
-			p2.add( Box.createVerticalStrut(20));
-			
-			JPanel p3 = new VerticalPanel();
-			p3.setBorder( new EmptyBorder( 20, 0, 0, 0));
-			p3.add( "Connection status: ", m_status);
-			
+
+			p1.add(Box.createVerticalStrut(50));
+			p1.add(p2);
+
 			JPanel p4 = new JPanel( new BorderLayout() );
 			p4.add( p1, BorderLayout.WEST);
-			p4.add( p2);
-			p4.add( p3, BorderLayout.SOUTH);
 
 			setLayout( new BorderLayout() );
 			add( p4, BorderLayout.NORTH);
 		}
 
 		protected void onConnect() {
-			int port = Integer.parseInt( m_port.getText() );
-			int clientId = Integer.parseInt( m_clientId.getText() );
-			controller().connect( m_host.getText(), port, clientId, m_connectOptionsTF.getText());
+//			int port = Integer.parseInt( m_port.getText() );
+//			int clientId = Integer.parseInt( m_clientId.getText() );
+//			controller().connect( m_host.getText(), port, clientId, m_connectOptionsTF.getText());
+			// TODO: 2020/2/26 此处修改连接地址
+			controller().connect( "127.0.0.1", 7497, 0, m_connectOptionsTF.getText());
+			m_conn_frame.dispose();
+			INSTANCE.run();
+
 		}
 	}
 	

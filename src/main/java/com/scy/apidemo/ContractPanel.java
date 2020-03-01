@@ -29,28 +29,7 @@ public class ContractPanel extends JPanel {
 	private Contract m_contract;
 
 	ContractPanel(Contract c) {
-		m_contract = c;
-
-		if (c.secType() == SecType.None) {
-			m_symbol.setText( "IBM");
-			m_secType.setSelectedItem( SecType.STK);
-			m_exchange.setText( "SMART");
-			m_compExch.setText( "ISLAND");
-			m_currency.setText( "USD");
-		}
-		else {
-			m_symbol.setText( m_contract.symbol());
-			m_secType.setSelectedItem( m_contract.secType() );
-			m_lastTradeDateOrContractMonth.setText( m_contract.lastTradeDateOrContractMonth());
-			m_strike.setText( "" + m_contract.strike() );
-			m_right.setSelectedItem( m_contract.right() ); 
-			m_multiplier.setText( m_contract.multiplier() );
-			m_exchange.setText( m_contract.exchange());
-			m_compExch.setText( m_contract.primaryExch() );
-			m_currency.setText( m_contract.currency());
-			m_localSymbol.setText( m_contract.localSymbol());
-			m_tradingClass.setText( m_contract.tradingClass() );
-		}
+		updateContractPanel(c);
 		
 		VerticalPanel p = new VerticalPanel();
     	p.add( "Symbol", m_symbol);
@@ -67,6 +46,31 @@ public class ContractPanel extends JPanel {
     	
     	setLayout( new BorderLayout() );
     	add( p);
+	}
+
+	public void updateContractPanel(Contract c) {
+		m_contract = c;
+
+		if (c.secType() == SecType.None) {
+			m_symbol.setText( "IBM");
+			m_secType.setSelectedItem( SecType.STK);
+			m_exchange.setText( "SMART");
+			m_compExch.setText( "ISLAND");
+			m_currency.setText( "USD");
+		}
+		else {
+			m_symbol.setText( m_contract.symbol());
+			m_secType.setSelectedItem( m_contract.secType() );
+			m_lastTradeDateOrContractMonth.setText( m_contract.lastTradeDateOrContractMonth());
+			m_strike.setText( "" + m_contract.strike() );
+			m_right.setSelectedItem( m_contract.right() );
+			m_multiplier.setText( m_contract.multiplier() );
+			m_exchange.setText( m_contract.exchange());
+			m_compExch.setText( m_contract.primaryExch() );
+			m_currency.setText( m_contract.currency());
+			m_localSymbol.setText( m_contract.localSymbol());
+			m_tradingClass.setText( m_contract.tradingClass() );
+		}
 	}
 	
 	@Override public Dimension getMaximumSize() {

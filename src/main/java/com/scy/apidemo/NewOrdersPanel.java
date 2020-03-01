@@ -5,6 +5,7 @@ package com.scy.apidemo;
 
 import com.ib.client.*;
 import com.ib.controller.ApiController.ILiveOrderHandler;
+import com.scy.apidemo.util.HtmlButton;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -19,11 +20,29 @@ public class NewOrdersPanel extends JPanel {
 	private OrdersModel m_model = new OrdersModel();
 	private JTable m_table = new JTable( m_model);
 
+	private NewSubmitOrderPanel submitOrderPanel;
+
 	NewOrdersPanel() {
 		JScrollPane scroll = new JScrollPane( m_table);
 		scroll.setBorder( new TitledBorder( "未成交订单"));
-		
+
+		HtmlButton refreshBut = new HtmlButton("刷新") {
+			@Override
+			protected void actionPerformed() {
+				onRefresh();
+			}
+		};
+
+		JPanel refreshPanel = new JPanel( new FlowLayout( FlowLayout.RIGHT, 10, 0));
+		refreshPanel.add( refreshBut);
+
+		JPanel loPanel = new JPanel(new BorderLayout());
+		loPanel.add(scroll, BorderLayout.CENTER);
+		loPanel.add(refreshPanel, BorderLayout.SOUTH);
+
+
 		m_table.addMouseListener( new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					onDoubleClick();
@@ -42,8 +61,9 @@ public class NewOrdersPanel extends JPanel {
 		butsPanel.add(cancelAllBut);
 
 		setLayout( new BorderLayout() );
-		add( new NewSubmitOrderPanel(), BorderLayout.WEST);
-		add( scroll);
+		submitOrderPanel = new NewSubmitOrderPanel();
+		add(submitOrderPanel, BorderLayout.WEST);
+		add( loPanel);
 		add( butsPanel, BorderLayout.EAST);
 		setPreferredSize(new Dimension(1000, 300));
 	}
@@ -51,8 +71,8 @@ public class NewOrdersPanel extends JPanel {
 	protected void onDoubleClick() {
 		OrderRow order = getSelectedOrder();
 		if (order != null) {
-			TicketDlg dlg = new TicketDlg( order.m_contract, order.m_order);
-			dlg.setVisible( true);
+			submitOrderPanel.setM_order(order.m_order);
+			submitOrderPanel.setM_contract(order.m_contract);
 		}
 	}
 

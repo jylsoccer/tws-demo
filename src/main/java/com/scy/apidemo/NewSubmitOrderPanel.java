@@ -4,7 +4,7 @@
 package com.scy.apidemo;
 
 import com.ib.client.*;
-import com.scy.apidemo.util.NewTabbedPanel;
+import com.ib.controller.ApiController;
 import com.scy.apidemo.util.TCombo;
 import com.scy.apidemo.util.UpperField;
 import com.scy.apidemo.util.VerticalPanel;
@@ -24,27 +24,29 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 
 
 	public NewSubmitOrderPanel() {
-		if (m_contract == null) {
-			m_contract = new Contract();
-			m_editContract = true;
-		}
+		m_contract = new Contract();
 
-		if (m_order == null) {
-			m_order = new Order();
-			m_order.totalQuantity( 100);
-			m_order.lmtPrice( 1);
-		}
-
+		m_order = new Order();
+		m_order.totalQuantity(100);
+		m_order.lmtPrice(1);
 
 		m_contractPanel = new ContractPanel( m_contract);
 		m_orderPanel = new OrderPanel();
+
 		JTabbedPane tabbedPanel = new JTabbedPane();
 
 		tabbedPanel.addTab( "合约", m_contractPanel);
 		tabbedPanel.addTab( "订单", m_orderPanel);
 
 		JButton submitBut = new JButton( "下单");
+		submitBut.addActionListener(
+				(e) -> onTransmitOrder()
+		);
+
 		JButton resetBut = new JButton( "重置");
+		resetBut.addActionListener(
+				(e) -> onResetOrder()
+		);
 
 		JPanel butsPanel = new JPanel();
 		butsPanel.add(submitBut);
@@ -67,8 +69,43 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 		return "";
 	}
 
+	private void onTransmitOrder() {
+		scrape();
+
+		ApiDemo.INSTANCE.controller().placeOrModifyOrder( m_contract, m_order, new ApiController.IOrderHandler() {
+			@Override public void orderState(OrderState orderState) {
+				SwingUtilities.invokeLater( new Runnable() {
+					@Override public void run() {
+					}
+				});
+			}
+			@Override public void orderStatus(OrderStatus status, double filled, double remaining, double avgFillPrice, long permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+			}
+			@Override public void handle(int errorCode, final String errorMsg) {
+				m_order.orderId( 0);
+			}
+		});
+		m_order.orderId(0);
+	}
+
+	private void onResetOrder() {
+		m_contract = new Contract();
+		m_contractPanel.updateContractPanel(m_contract);
+
+		m_order = new Order();
+		m_order.totalQuantity(100);
+		m_order.lmtPrice(1);
+		updateOrderPanel(m_order);
+	}
+
+	private void scrape() {
+		m_order.smartComboRoutingParams().clear();
+		m_contractPanel.onOK();
+		m_orderPanel.onOK();
+	}
+
 	class OrderPanel extends VerticalPanel {
-		final TCombo<String> m_account = new TCombo<String>( "" );// TODO: 2020/2/29
+		final TCombo<String> m_account = new TCombo<String>( ApiDemo.INSTANCE.accountList().get( 0) );
 		final TCombo<Types.Action> m_action = new TCombo<Types.Action>( Types.Action.values() );
 		final JTextField m_modelCode = new JTextField();
 		final UpperField m_quantity = new UpperField( "100");
@@ -84,7 +121,7 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 		OrderPanel() {
 			m_orderType.removeItemAt( 0); // remove None
 
-			m_account.setSelectedItem( m_order.account() != null ? m_order.account() : "" );// TODO: 2020/2/29  ApiDemo.INSTANCE.accountList().get( 0)
+			m_account.setSelectedItem( m_order.account() != null ? m_order.account() : ApiDemo.INSTANCE.accountList().get( 0) );
 			m_modelCode.setText( m_order.modelCode() );
 			m_action.setSelectedItem( m_order.action() );
 			m_quantity.setText( m_order.totalQuantity());
@@ -134,4 +171,39 @@ public class NewSubmitOrderPanel extends VerticalPanel {
 		}
 	}
 
+	public Contract getM_contract() {
+		return m_contract;
+	}
+
+	public void setM_contract(Contract m_contract) {
+		this.m_contract = m_contract;
+
+		m_contractPanel.updateContractPanel(m_contract);
+	}
+
+	public Order getM_order() {
+		return m_order;
+	}
+
+	public void setM_order(Order m_order) {
+		this.m_order = m_order;
+
+		updateOrderPanel(m_order);
+	}
+
+	private void updateOrderPanel(Order order) {
+		m_orderPanel.m_orderType.removeItemAt( 0); // remove None
+		m_orderPanel.m_account.setSelectedItem( order.account() != null ? order.account() : ApiDemo.INSTANCE.accountList().get( 0) );
+		m_orderPanel.m_modelCode.setText( order.modelCode() );
+		m_orderPanel.m_action.setSelectedItem( order.action() );
+		m_orderPanel.m_quantity.setText( order.totalQuantity());
+		m_orderPanel.m_displaySize.setText( order.displaySize());
+		m_orderPanel.m_orderType.setSelectedItem( order.orderType() );
+		m_orderPanel.m_lmtPrice.setText( order.lmtPrice());
+		m_orderPanel.m_auxPrice.setText( order.auxPrice());
+		m_orderPanel.m_tif.setSelectedItem( order.tif());
+		m_orderPanel.m_nonGuaranteed.setSelected( getVal( Types.ComboParam.NonGuaranteed).equals( "1") );
+		m_orderPanel.m_lmtPriceOffset.setText(order.lmtPriceOffset());
+		m_orderPanel.m_triggerPrice.setText(order.triggerPrice());
+	}
 }
